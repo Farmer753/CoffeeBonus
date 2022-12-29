@@ -47,5 +47,8 @@ dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-reflect:1.7.21"
 
+//    map
+    implementation 'com.yandex.android:maps.mobile:4.2.2-full'
+
 
 }

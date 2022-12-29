@@ -1,10 +1,14 @@
 package ru.ll.coffeebonus
 
 import android.os.Bundle
-import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import com.yandex.mapkit.Animation
+import com.yandex.mapkit.MapKitFactory
+import com.yandex.mapkit.geometry.Point
+import com.yandex.mapkit.map.CameraPosition
+import com.yandex.mapkit.mapview.MapView
 import ru.ll.coffeebonus.di.ViewModelFactory
 import timber.log.Timber
 import javax.inject.Inject
@@ -17,6 +21,8 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
 
+    lateinit var mapview: MapView
+
 
     val viewModel: MainActivityViewModel by lazy {
         ViewModelProvider(
@@ -27,15 +33,36 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        MapKitFactory.initialize(this)
         setContentView(R.layout.activity_main)
         (application as CoffeeBonusApp).appComponent.inject(this)
         Timber.d("переменная $test")
         val textView: TextView = findViewById<TextView>(R.id.abc)
         textView.setOnClickListener { viewModel.test() }
+        mapview = findViewById<MapView>(R.id.mapview)
+        mapview.map.move(
+            CameraPosition(
+                Point(55.751574, 37.573856), 11.0f, 0.0f, 0.0f
+            ),
+            Animation(Animation.Type.SMOOTH, 0f),
+            null
+        )
     }
 
     override fun onDestroy() {
         super.onDestroy()
         Timber.d("onDestroy")
+    }
+
+    override fun onStop() {
+        mapview.onStop()
+        MapKitFactory.getInstance().onStop()
+        super.onStop()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        MapKitFactory.getInstance().onStart()
+        mapview.onStart()
     }
 }
