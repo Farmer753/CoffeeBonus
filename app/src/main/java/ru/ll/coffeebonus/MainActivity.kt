@@ -1,41 +1,44 @@
 package ru.ll.coffeebonus
 
+//import ru.ll.coffeebonus.di.ViewModelFactory
 import android.os.Bundle
 import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.mapview.MapView
-import ru.ll.coffeebonus.di.ViewModelFactory
+import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
 import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     @Inject
     lateinit var test: String
 
-    @Inject
-    lateinit var viewModelFactory: ViewModelFactory
+    private val viewModel: MainActivityViewModel by viewModels()
+
+//    @Inject
+//    lateinit var viewModelFactory: ViewModelFactory
 
     lateinit var mapview: MapView
 
 
-    val viewModel: MainActivityViewModel by lazy {
-        ViewModelProvider(
-            this,
-            viewModelFactory
-        )[MainActivityViewModel::class.java]
-    }
+//    val viewModel: MainActivityViewModel by lazy {
+//        ViewModelProvider(
+//            this,
+//            viewModelFactory
+//        )[MainActivityViewModel::class.java]
+//    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         MapKitFactory.initialize(this)
         setContentView(R.layout.activity_main)
-        (application as CoffeeBonusApp).appComponent.inject(this)
         Timber.d("переменная $test")
         val textView: TextView = findViewById<TextView>(R.id.abc)
         textView.setOnClickListener { viewModel.test() }
