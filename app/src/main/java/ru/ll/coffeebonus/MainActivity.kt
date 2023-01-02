@@ -20,7 +20,12 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var test: String
 
-    private val viewModel: MainActivityViewModel by viewModels()
+    @Inject
+    lateinit var viewModelAssistedFactory: MainActivityViewModel.Factory
+
+    private val viewModel: MainActivityViewModel by viewModels {
+        MainActivityViewModel.provideFactory(viewModelAssistedFactory, "String Id")
+    }
 
 //    @Inject
 //    lateinit var viewModelFactory: ViewModelFactory
