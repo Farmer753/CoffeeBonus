@@ -1,10 +1,11 @@
-package ru.ll.coffeebonus
+package ru.ll.coffeebonus.ui
 
 //import ru.ll.coffeebonus.di.ViewModelFactory
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import dagger.hilt.android.AndroidEntryPoint
+import ru.ll.coffeebonus.R
 import timber.log.Timber
 import javax.inject.Inject
 

@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/profileFragment"
-        android:name="ru.ll.coffeebonus.ProfileFragment"
+        android:name="ru.ll.coffeebonus.ui.profile.ProfileFragment"
         android:label="Profile"
         tools:layout="@layout/fragment_profile">
         <action
@@ -17,7 +17,7 @@
 
     <fragment
         android:id="@+id/mapFragment"
-        android:name="ru.ll.coffeebonus.MapFragment"
+        android:name="ru.ll.coffeebonus.ui.map.MapFragment"
         android:label="Map"
         tools:layout="@layout/fragment_map" />
 

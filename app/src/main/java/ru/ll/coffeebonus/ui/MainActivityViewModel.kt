@@ -1,13 +1,11 @@
-package ru.ll.coffeebonus
+package ru.ll.coffeebonus.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import dagger.hilt.android.lifecycle.HiltViewModel
 import timber.log.Timber
-import javax.inject.Inject
 
 
 class MainActivityViewModel @AssistedInject constructor(
