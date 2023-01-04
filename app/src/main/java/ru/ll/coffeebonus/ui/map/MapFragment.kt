@@ -8,10 +8,12 @@ import androidx.fragment.app.viewModels
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
+import com.yandex.mapkit.layers.GeoObjectTapListener
 import com.yandex.mapkit.map.CameraPosition
 import dagger.hilt.android.AndroidEntryPoint
 import ru.ll.coffeebonus.databinding.FragmentMapBinding
 import ru.ll.coffeebonus.ui.BaseFragment
+import ru.ll.coffeebonus.ui.coffee.CoffeeFragment
 import timber.log.Timber
 
 @AndroidEntryPoint
@@ -27,6 +29,13 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         MapKitFactory.initialize(requireContext())
     }
 
+    val tapListener: GeoObjectTapListener = GeoObjectTapListener {
+        Timber.d("координаты ${it.geoObject.geometry.first().point!!.longitude}")
+        Timber.d("координаты ${it.geoObject.geometry.first().point!!.latitude}")
+        CoffeeFragment().show(childFragmentManager, "tag")
+        false
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Timber.d("переменная из MapFragment ${viewModel.test} ")
@@ -37,6 +46,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
             Animation(Animation.Type.SMOOTH, 0f),
             null
         )
+        binding.mapview.map.addTapListener(tapListener)
     }
 
     override fun onStop() {
