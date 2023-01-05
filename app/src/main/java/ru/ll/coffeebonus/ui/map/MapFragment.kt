@@ -4,16 +4,20 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.layers.GeoObjectTapListener
 import com.yandex.mapkit.map.CameraPosition
 import dagger.hilt.android.AndroidEntryPoint
+import ru.ll.coffeebonus.R
 import ru.ll.coffeebonus.databinding.FragmentMapBinding
 import ru.ll.coffeebonus.ui.BaseFragment
-import ru.ll.coffeebonus.ui.coffee.CoffeeFragment
+import ru.ll.coffeebonus.ui.coffee.CoffeeFragment.Companion.ARG_LAT
+import ru.ll.coffeebonus.ui.coffee.CoffeeFragment.Companion.ARG_LON
 import timber.log.Timber
 
 @AndroidEntryPoint
@@ -30,9 +34,16 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
     }
 
     val tapListener: GeoObjectTapListener = GeoObjectTapListener {
-        Timber.d("координаты ${it.geoObject.geometry.first().point!!.longitude}")
-        Timber.d("координаты ${it.geoObject.geometry.first().point!!.latitude}")
-        CoffeeFragment().show(childFragmentManager, "tag")
+        val longitude = it.geoObject.geometry.first().point!!.longitude.toFloat()
+        val latitude = it.geoObject.geometry.first().point!!.latitude.toFloat()
+        Timber.d("координаты $longitude")
+        Timber.d("координаты $latitude")
+        findNavController().navigate(
+            R.id.action_map_to_coffee, bundleOf(
+                ARG_LON to longitude,
+                ARG_LAT to latitude
+            )
+        )
         false
     }
 

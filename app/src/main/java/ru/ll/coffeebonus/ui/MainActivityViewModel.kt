@@ -17,10 +17,10 @@ class MainActivityViewModel @AssistedInject constructor(
     companion object {
         fun provideFactory(
             assistedFactory: Factory,
-            noteId: String
+            stringId: String
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return assistedFactory.create(noteId) as T
+                return assistedFactory.create(stringId) as T
             }
         }
     }

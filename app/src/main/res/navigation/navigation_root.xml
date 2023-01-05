@@ -19,6 +19,29 @@
         android:id="@+id/mapFragment"
         android:name="ru.ll.coffeebonus.ui.map.MapFragment"
         android:label="Map"
-        tools:layout="@layout/fragment_map" />
+        tools:layout="@layout/fragment_map">
+        <action
+            android:id="@+id/action_map_to_coffee"
+            app:destination="@+id/coffeeDialogFragment">
+            <argument
+                android:name="ARG_LON"
+                app:argType="float" />
+            <argument
+                android:name="ARG_LAT"
+                app:argType="float" />
+        </action>
+    </fragment>
 
+    <dialog
+        android:id="@+id/coffeeDialogFragment"
+        android:name="ru.ll.coffeebonus.ui.coffee.CoffeeFragment"
+        android:label="Coffee"
+        tools:layout="@layout/fragment_coffee">
+        <argument
+            android:name="ARG_LON"
+            app:argType="float" />
+        <argument
+            android:name="ARG_LAT"
+            app:argType="float" />
+    </dialog>
 </navigation>
