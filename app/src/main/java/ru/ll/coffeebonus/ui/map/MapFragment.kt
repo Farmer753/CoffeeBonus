@@ -12,9 +12,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKitFactory
+import com.yandex.mapkit.geometry.Geometry
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.layers.GeoObjectTapListener
 import com.yandex.mapkit.map.CameraPosition
+import com.yandex.mapkit.search.*
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import ru.ll.coffeebonus.R
@@ -26,6 +28,9 @@ import timber.log.Timber
 
 @AndroidEntryPoint
 class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
+
+    var searchManager: SearchManager? = null
+    var searchSession: Session? = null
 
     override val viewModel: MapViewModel by viewModels()
 
@@ -51,12 +56,13 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         Timber.d("переменная из MapFragment ${viewModel.test} ")
         binding.mapview.map.move(
             CameraPosition(
-                Point(55.751574, 37.573856), 11.0f, 0.0f, 0.0f
+                Point(59.938879, 30.315212), 11.0f, 0.0f, 0.0f
             ),
             Animation(Animation.Type.SMOOTH, 0f),
             null
         )
         binding.mapview.map.addTapListener(tapListener)
+        searchCoffee()
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.eventsFlow
@@ -86,6 +92,27 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         super.onStart()
         MapKitFactory.getInstance().onStart()
         binding.mapview.onStart()
+    }
+
+    fun searchCoffee() {
+        searchManager = SearchFactory.getInstance().createSearchManager(
+            SearchManagerType.ONLINE
+        )
+        val point = Geometry.fromPoint(Point(59.95, 30.32))
+        searchSession = searchManager!!.submit("кафе", point, SearchOptions(),
+            object : Session.SearchListener {
+                override fun onSearchResponse(p0: Response) {
+                    showMessage("Success")
+                    p0.collection.children.forEach {
+                        Timber.d("Успешный вывод ${it.obj?.name}")
+                    }
+                }
+
+                override fun onSearchError(p0: com.yandex.runtime.Error) {
+                    showMessage("Error")
+                }
+            }
+        )
     }
 
 }
