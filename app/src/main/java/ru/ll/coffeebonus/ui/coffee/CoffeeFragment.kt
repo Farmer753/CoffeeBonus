@@ -36,11 +36,12 @@ class CoffeeFragment : BottomSheetDialogFragment() {
         )
     }
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Timber.d("Широта ${viewModel.latitude}")
         Timber.d("Долгота ${viewModel.longitude}")
+        binding.latitude.text = "Широта ${viewModel.latitude}"
+        binding.longitude.text = "Долгота ${viewModel.longitude}"
     }
 
     override fun onCreateView(
