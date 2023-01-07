@@ -6,6 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKitFactory
@@ -13,6 +16,7 @@ import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.layers.GeoObjectTapListener
 import com.yandex.mapkit.map.CameraPosition
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import ru.ll.coffeebonus.R
 import ru.ll.coffeebonus.databinding.FragmentMapBinding
 import ru.ll.coffeebonus.ui.BaseFragment
@@ -38,12 +42,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         val latitude = it.geoObject.geometry.first().point!!.latitude.toFloat()
         Timber.d("координаты $longitude")
         Timber.d("координаты $latitude")
-        findNavController().navigate(
-            R.id.action_map_to_coffee, bundleOf(
-                ARG_LON to longitude,
-                ARG_LAT to latitude
-            )
-        )
+        viewModel.mapClick(longitude, latitude)
         false
     }
 
@@ -58,6 +57,23 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
             null
         )
         binding.mapview.map.addTapListener(tapListener)
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.eventsFlow
+                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .collect { event ->
+                    when (event) {
+                        is MapViewModel.Event.NavigateToCoffee -> {
+                            findNavController().navigate(
+                                R.id.action_map_to_coffee, bundleOf(
+                                    ARG_LON to event.longitude,
+                                    ARG_LAT to event.latitude
+                                )
+                            )
+                        }
+                    }
+                }
+        }
     }
 
     override fun onStop() {
