@@ -1,4 +1,4 @@
-package ru.ll.coffeebonus
+package ru.ll.coffeebonus.ui
 
 import androidx.lifecycle.ViewModel
 import timber.log.Timber

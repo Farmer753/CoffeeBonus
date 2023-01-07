@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation_root"
+    app:startDestination="@id/profileFragment">
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="ru.ll.coffeebonus.ui.profile.ProfileFragment"
+        android:label="Profile"
+        tools:layout="@layout/fragment_profile">
+        <action
+            android:id="@+id/action_profile_to_map"
+            app:destination="@+id/mapFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/mapFragment"
+        android:name="ru.ll.coffeebonus.ui.map.MapFragment"
+        android:label="Map"
+        tools:layout="@layout/fragment_map">
+        <action
+            android:id="@+id/action_map_to_coffee"
+            app:destination="@+id/coffeeDialogFragment">
+            <argument
+                android:name="ARG_LON"
+                app:argType="float" />
+            <argument
+                android:name="ARG_LAT"
+                app:argType="float" />
+        </action>
+    </fragment>
+
+    <dialog
+        android:id="@+id/coffeeDialogFragment"
+        android:name="ru.ll.coffeebonus.ui.coffee.CoffeeFragment"
+        android:label="Coffee"
+        tools:layout="@layout/fragment_coffee">
+        <argument
+            android:name="ARG_LON"
+            app:argType="float" />
+        <argument
+            android:name="ARG_LAT"
+            app:argType="float" />
+    </dialog>
+</navigation>
