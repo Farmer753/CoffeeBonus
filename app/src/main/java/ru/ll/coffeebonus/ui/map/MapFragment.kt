@@ -12,10 +12,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKitFactory
-import com.yandex.mapkit.geometry.Geometry
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.layers.GeoObjectTapListener
 import com.yandex.mapkit.map.CameraPosition
+import com.yandex.mapkit.map.VisibleRegionUtils
 import com.yandex.mapkit.search.*
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -31,7 +31,18 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
 
     var searchManager: SearchManager? = null
     var searchSession: Session? = null
-
+    val listener = object : Session.SearchListener {
+        override fun onSearchResponse(p0: Response) {
+            showMessage("Success")
+            p0.collection.children.forEach {
+                Timber.d("Успешный вывод ${it.obj?.name}")
+            }
+        }
+        override fun onSearchError(p0: com.yandex.runtime.Error) {
+            showMessage("Error $p0")
+            Timber.e("Error $p0")
+        }
+    }
     override val viewModel: MapViewModel by viewModels()
 
     override val bindingInflater: (LayoutInflater, ViewGroup?, Boolean) -> FragmentMapBinding =
@@ -40,6 +51,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         MapKitFactory.initialize(requireContext())
+        SearchFactory.initialize(requireContext())
     }
 
     val tapListener: GeoObjectTapListener = GeoObjectTapListener {
@@ -98,21 +110,13 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         searchManager = SearchFactory.getInstance().createSearchManager(
             SearchManagerType.ONLINE
         )
-        val point = Geometry.fromPoint(Point(59.95, 30.32))
-        searchSession = searchManager!!.submit("кафе", point, SearchOptions(),
-            object : Session.SearchListener {
-                override fun onSearchResponse(p0: Response) {
-                    showMessage("Success")
-                    p0.collection.children.forEach {
-                        Timber.d("Успешный вывод ${it.obj?.name}")
-                    }
-                }
-
-                override fun onSearchError(p0: com.yandex.runtime.Error) {
-                    showMessage("Error")
-                }
-            }
+        val point = VisibleRegionUtils.toPolygon(binding.mapview.map.visibleRegion)
+       Timber.d("выводим из searchCoffee ${point.boundingBox!!.northEast.latitude} ")
+        searchSession = searchManager!!.submit(
+            "кофейня",
+            point,
+            SearchOptions(),
+            listener
         )
     }
-
 }
