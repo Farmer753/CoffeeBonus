@@ -15,12 +15,15 @@ import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.layers.GeoObjectTapListener
 import com.yandex.mapkit.map.CameraPosition
+import com.yandex.mapkit.map.MapObjectCollection
+import com.yandex.mapkit.map.MapObjectTapListener
 import com.yandex.mapkit.map.VisibleRegionUtils
 import com.yandex.mapkit.search.*
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import ru.ll.coffeebonus.R
 import ru.ll.coffeebonus.databinding.FragmentMapBinding
+import ru.ll.coffeebonus.di.util.DrawableImageProvider
 import ru.ll.coffeebonus.ui.BaseFragment
 import ru.ll.coffeebonus.ui.coffee.CoffeeFragment.Companion.ARG_LAT
 import ru.ll.coffeebonus.ui.coffee.CoffeeFragment.Companion.ARG_LON
@@ -29,6 +32,7 @@ import timber.log.Timber
 @AndroidEntryPoint
 class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
 
+    lateinit var mapObjects: MapObjectCollection
     var searchManager: SearchManager? = null
     var searchSession: Session? = null
     val listener = object : Session.SearchListener {
@@ -36,8 +40,19 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
             showMessage("Success")
             p0.collection.children.forEach {
                 Timber.d("Успешный вывод ${it.obj?.name}")
+                Timber.d("Вывод поинт ${it.obj!!.geometry.first().point!!.latitude}")
+                val imageProvider = DrawableImageProvider(
+                    requireContext(),
+                    R.drawable.ic_action_name
+                )
+                val placeMark = mapObjects.addPlacemark(
+                    it.obj!!.geometry.first().point!!,
+                    imageProvider
+                )
+                placeMark.addTapListener(placeMarkTapListener)
             }
         }
+
         override fun onSearchError(p0: com.yandex.runtime.Error) {
             showMessage("Error $p0")
             Timber.e("Error $p0")
@@ -60,7 +75,12 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         Timber.d("координаты $longitude")
         Timber.d("координаты $latitude")
         viewModel.mapClick(longitude, latitude)
-        false
+        true
+    }
+
+    val placeMarkTapListener: MapObjectTapListener = MapObjectTapListener { a, b ->
+        showMessage("Нажата")
+        true
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -74,6 +94,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
             null
         )
         binding.mapview.map.addTapListener(tapListener)
+        mapObjects = binding.mapview.map.mapObjects.addCollection()
         searchCoffee()
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -94,6 +115,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         }
     }
 
+
     override fun onStop() {
         binding.mapview.onStop()
         MapKitFactory.getInstance().onStop()
@@ -111,7 +133,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
             SearchManagerType.ONLINE
         )
         val point = VisibleRegionUtils.toPolygon(binding.mapview.map.visibleRegion)
-       Timber.d("выводим из searchCoffee ${point.boundingBox!!.northEast.latitude} ")
+//        Timber.d("выводим из searchCoffee ${point.boundingBox!!.northEast.latitude} ")
         searchSession = searchManager!!.submit(
             "кофейня",
             point,
