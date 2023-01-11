@@ -70,9 +70,20 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         SearchFactory.initialize(requireContext())
     }
 
-    val placeMarkTapListener: MapObjectTapListener = MapObjectTapListener { a, b ->
+    val placeMarkTapListener: MapObjectTapListener = MapObjectTapListener { a, point ->
         showMessage("Нажата")
-        viewModel.mapClick(b.longitude.toFloat(), b.latitude.toFloat(), a.userData.toString())
+        binding.mapview.map.move(
+            CameraPosition(
+                point, 14.0f, 0.0f, 0.0f
+            ),
+            Animation(Animation.Type.SMOOTH, 0.5f)
+        ) {
+            viewModel.mapClick(
+                point.longitude.toFloat(),
+                point.latitude.toFloat(),
+                a.userData.toString()
+            )
+        }
         true
     }
 
