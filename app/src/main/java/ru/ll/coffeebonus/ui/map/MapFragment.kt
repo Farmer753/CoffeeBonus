@@ -13,7 +13,6 @@ import androidx.navigation.fragment.findNavController
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
-import com.yandex.mapkit.layers.GeoObjectTapListener
 import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.map.MapObjectCollection
 import com.yandex.mapkit.map.MapObjectTapListener
@@ -27,6 +26,7 @@ import ru.ll.coffeebonus.di.util.DrawableImageProvider
 import ru.ll.coffeebonus.ui.BaseFragment
 import ru.ll.coffeebonus.ui.coffee.CoffeeFragment.Companion.ARG_LAT
 import ru.ll.coffeebonus.ui.coffee.CoffeeFragment.Companion.ARG_LON
+import ru.ll.coffeebonus.ui.coffee.CoffeeFragment.Companion.ARG_NAME
 import timber.log.Timber
 
 @AndroidEntryPoint
@@ -50,6 +50,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                     imageProvider
                 )
                 placeMark.addTapListener(placeMarkTapListener)
+                placeMark.userData = it.obj?.name
             }
         }
 
@@ -69,17 +70,9 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         SearchFactory.initialize(requireContext())
     }
 
-    val tapListener: GeoObjectTapListener = GeoObjectTapListener {
-        val longitude = it.geoObject.geometry.first().point!!.longitude.toFloat()
-        val latitude = it.geoObject.geometry.first().point!!.latitude.toFloat()
-        Timber.d("координаты $longitude")
-        Timber.d("координаты $latitude")
-        viewModel.mapClick(longitude, latitude)
-        true
-    }
-
     val placeMarkTapListener: MapObjectTapListener = MapObjectTapListener { a, b ->
         showMessage("Нажата")
+        viewModel.mapClick(b.longitude.toFloat(), b.latitude.toFloat(), a.userData.toString())
         true
     }
 
@@ -93,7 +86,6 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
             Animation(Animation.Type.SMOOTH, 0f),
             null
         )
-        binding.mapview.map.addTapListener(tapListener)
         mapObjects = binding.mapview.map.mapObjects.addCollection()
         searchCoffee()
 
@@ -106,7 +98,8 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                             findNavController().navigate(
                                 R.id.action_map_to_coffee, bundleOf(
                                     ARG_LON to event.longitude,
-                                    ARG_LAT to event.latitude
+                                    ARG_LAT to event.latitude,
+                                    ARG_NAME to event.nameCoffee
                                 )
                             )
                         }

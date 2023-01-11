@@ -9,7 +9,8 @@ import ru.ll.coffeebonus.ui.BaseViewModel
 
 class CoffeeViewModel @AssistedInject constructor(
     @Assisted("latitude") val latitude: Float,
-    @Assisted("longitude") val longitude: Float
+    @Assisted("longitude") val longitude: Float,
+    @Assisted("nameCoffee") val nameCoffee: String
 ) : BaseViewModel() {
 
     @Suppress("UNCHECKED_CAST")
@@ -17,10 +18,11 @@ class CoffeeViewModel @AssistedInject constructor(
         fun provideFactory(
             assistedFactory: Factory,
             latitude: Float,
-            longitude: Float
+            longitude: Float,
+            nameCoffee: String
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return assistedFactory.create(latitude, longitude) as T
+                return assistedFactory.create(latitude, longitude, nameCoffee) as T
             }
         }
     }
@@ -29,7 +31,8 @@ class CoffeeViewModel @AssistedInject constructor(
     interface Factory {
         fun create(
             @Assisted("latitude") latitude: Float,
-            @Assisted("longitude") longitude: Float
+            @Assisted("longitude") longitude: Float,
+            @Assisted("nameCoffee") nameCoffee: String
         ): CoffeeViewModel
     }
 }

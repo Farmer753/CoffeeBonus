@@ -25,4 +25,12 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:text="latitude" />
 
+    <TextView
+        android:id="@+id/coffeeName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Name"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@+id/longitude" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

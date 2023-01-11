@@ -17,6 +17,7 @@ class CoffeeFragment : BottomSheetDialogFragment() {
     companion object {
         const val ARG_LON = "ARG_LON"
         const val ARG_LAT = "ARG_LAT"
+        const val ARG_NAME = "ARG_NAME"
     }
 
     private var _binding: FragmentCoffeeBinding? = null
@@ -32,7 +33,8 @@ class CoffeeFragment : BottomSheetDialogFragment() {
         CoffeeViewModel.provideFactory(
             viewModelAssistedFactory,
             requireArguments().getFloat(ARG_LAT),
-            requireArguments().getFloat(ARG_LON)
+            requireArguments().getFloat(ARG_LON),
+            requireArguments().getString(ARG_NAME)!!
         )
     }
 
@@ -42,6 +44,7 @@ class CoffeeFragment : BottomSheetDialogFragment() {
         Timber.d("Долгота ${viewModel.longitude}")
         binding.latitude.text = "Широта ${viewModel.latitude}"
         binding.longitude.text = "Долгота ${viewModel.longitude}"
+        binding.coffeeName.text = "Название ${viewModel.nameCoffee}"
     }
 
     override fun onCreateView(
