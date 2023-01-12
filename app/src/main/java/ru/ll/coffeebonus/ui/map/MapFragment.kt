@@ -13,10 +13,7 @@ import androidx.navigation.fragment.findNavController
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
-import com.yandex.mapkit.map.CameraPosition
-import com.yandex.mapkit.map.MapObjectCollection
-import com.yandex.mapkit.map.MapObjectTapListener
-import com.yandex.mapkit.map.VisibleRegionUtils
+import com.yandex.mapkit.map.*
 import com.yandex.mapkit.search.*
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -35,7 +32,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
     lateinit var mapObjects: MapObjectCollection
     var searchManager: SearchManager? = null
     var searchSession: Session? = null
-    val listener = object : Session.SearchListener {
+    val searchListener = object : Session.SearchListener {
         override fun onSearchResponse(p0: Response) {
             showMessage("Success")
             p0.collection.children.forEach {
@@ -59,6 +56,9 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
             Timber.e("Error $p0")
         }
     }
+
+    val cameraListener = CameraListener { p0, p1, p2, p3 -> searchCoffee() }
+
     override val viewModel: MapViewModel by viewModels()
 
     override val bindingInflater: (LayoutInflater, ViewGroup?, Boolean) -> FragmentMapBinding =
@@ -97,6 +97,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
             Animation(Animation.Type.SMOOTH, 0f),
             null
         )
+        binding.mapview.map.addCameraListener(cameraListener)
         mapObjects = binding.mapview.map.mapObjects.addCollection()
         searchCoffee()
 
@@ -142,7 +143,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
             "кофейня",
             point,
             SearchOptions(),
-            listener
+            searchListener
         )
     }
 }
