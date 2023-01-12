@@ -34,7 +34,10 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
     var searchSession: Session? = null
     val searchListener = object : Session.SearchListener {
         override fun onSearchResponse(p0: Response) {
-            showMessage("Success")
+            Timber.d("Ещё результаты ${searchSession!!.hasNextPage()}")
+            if (searchSession!!.hasNextPage()) {
+                searchSession!!.fetchNextPage(this)
+            }
             p0.collection.children.forEach {
                 Timber.d("Успешный вывод ${it.obj?.name}")
                 Timber.d("Вывод поинт ${it.obj!!.geometry.first().point!!.latitude}")
@@ -92,7 +95,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         Timber.d("переменная из MapFragment ${viewModel.test} ")
         binding.mapview.map.move(
             CameraPosition(
-                Point(59.938879, 30.315212), 11.0f, 0.0f, 0.0f
+                Point(59.938879, 30.315212), 15.0f, 0.0f, 0.0f
             ),
             Animation(Animation.Type.SMOOTH, 0f),
             null
