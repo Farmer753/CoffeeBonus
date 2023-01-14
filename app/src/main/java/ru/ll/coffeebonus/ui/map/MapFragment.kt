@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -15,11 +16,12 @@ import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.*
 import com.yandex.mapkit.search.*
+import com.yandex.mapkit.uri.UriObjectMetadata
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import ru.ll.coffeebonus.R
 import ru.ll.coffeebonus.databinding.FragmentMapBinding
-import ru.ll.coffeebonus.di.util.DrawableImageProvider
+import ru.ll.coffeebonus.domain.CoffeeShop
 import ru.ll.coffeebonus.ui.BaseFragment
 import ru.ll.coffeebonus.ui.coffee.CoffeeFragment.Companion.ARG_LAT
 import ru.ll.coffeebonus.ui.coffee.CoffeeFragment.Companion.ARG_LON
@@ -33,25 +35,46 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
     var searchManager: SearchManager? = null
     var searchSession: Session? = null
     val searchListener = object : Session.SearchListener {
-        override fun onSearchResponse(p0: Response) {
+        override fun onSearchResponse(response: Response) {
             Timber.d("Ещё результаты ${searchSession!!.hasNextPage()}")
             if (searchSession!!.hasNextPage()) {
                 searchSession!!.fetchNextPage(this)
             }
-            p0.collection.children.forEach {
-                Timber.d("Успешный вывод ${it.obj?.name}")
-                Timber.d("Вывод поинт ${it.obj!!.geometry.first().point!!.latitude}")
-                val imageProvider = DrawableImageProvider(
-                    requireContext(),
-                    R.drawable.ic_action_name
-                )
-                val placeMark = mapObjects.addPlacemark(
-                    it.obj!!.geometry.first().point!!,
-                    imageProvider
-                )
-                placeMark.addTapListener(placeMarkTapListener)
-                placeMark.userData = it.obj?.name
-            }
+            viewModel.onSearchResult(
+                response.collection.children.map {
+                    CoffeeShop(
+                        it.obj?.metadataContainer?.getItem(UriObjectMetadata::class.java)
+                            ?.uris
+                            ?.firstOrNull()
+                            ?.value
+                            ?.toUri()?.getQueryParameter("oid")!!,
+                        it.obj?.name!!,
+                        it.obj?.geometry?.first()?.point!!.longitude.toFloat(),
+                        it.obj?.geometry?.first()?.point!!.latitude.toFloat()
+                    )
+                }
+            )
+//            response.collection.children.forEach {
+//                val uri = it.obj?.metadataContainer?.getItem(UriObjectMetadata::class.java)
+//                    ?.uris
+//                    ?.firstOrNull()
+//                    ?.value
+//                    ?.toUri()
+//                    ?.getQueryParameter("oid")
+//
+//                Timber.d("Успешный вывод ${it.obj?.name}, $uri")
+//
+////                val imageProvider = DrawableImageProvider(
+////                    requireContext(),
+////                    R.drawable.ic_action_name
+////                )
+////                val placeMark = mapObjects.addPlacemark(
+////                    it.obj!!.geometry.first().point!!,
+////                    imageProvider
+////                )
+////                placeMark.addTapListener(placeMarkTapListener)
+////                placeMark.userData = it.obj?.name
+//            }
         }
 
         override fun onSearchError(p0: com.yandex.runtime.Error) {
@@ -121,6 +144,14 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                     }
                 }
         }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.searchResult
+                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .collect { result ->
+                    Timber.d("Список $result")
+                }
+        }
+
     }
 
 
