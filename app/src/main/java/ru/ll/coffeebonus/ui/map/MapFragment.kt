@@ -14,6 +14,7 @@ import androidx.navigation.fragment.findNavController
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
+import com.yandex.mapkit.layers.GeoObjectTapListener
 import com.yandex.mapkit.map.*
 import com.yandex.mapkit.search.*
 import com.yandex.mapkit.uri.UriObjectMetadata
@@ -21,11 +22,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import ru.ll.coffeebonus.R
 import ru.ll.coffeebonus.databinding.FragmentMapBinding
+import ru.ll.coffeebonus.di.util.DrawableImageProvider
 import ru.ll.coffeebonus.domain.CoffeeShop
 import ru.ll.coffeebonus.ui.BaseFragment
-import ru.ll.coffeebonus.ui.coffee.CoffeeFragment.Companion.ARG_LAT
-import ru.ll.coffeebonus.ui.coffee.CoffeeFragment.Companion.ARG_LON
-import ru.ll.coffeebonus.ui.coffee.CoffeeFragment.Companion.ARG_NAME
+import ru.ll.coffeebonus.ui.coffee.CoffeeFragment.Companion.ARG_COFFEESHOP
 import timber.log.Timber
 
 @AndroidEntryPoint
@@ -54,33 +54,17 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                     )
                 }
             )
-//            response.collection.children.forEach {
-//                val uri = it.obj?.metadataContainer?.getItem(UriObjectMetadata::class.java)
-//                    ?.uris
-//                    ?.firstOrNull()
-//                    ?.value
-//                    ?.toUri()
-//                    ?.getQueryParameter("oid")
-//
-//                Timber.d("Успешный вывод ${it.obj?.name}, $uri")
-//
-////                val imageProvider = DrawableImageProvider(
-////                    requireContext(),
-////                    R.drawable.ic_action_name
-////                )
-////                val placeMark = mapObjects.addPlacemark(
-////                    it.obj!!.geometry.first().point!!,
-////                    imageProvider
-////                )
-////                placeMark.addTapListener(placeMarkTapListener)
-////                placeMark.userData = it.obj?.name
-//            }
         }
 
         override fun onSearchError(p0: com.yandex.runtime.Error) {
             showMessage("Error $p0")
             Timber.e("Error $p0")
         }
+    }
+
+    val tapListener: GeoObjectTapListener = GeoObjectTapListener {
+        mapObjects.clear()
+        true
     }
 
     val cameraListener = CameraListener { p0, p1, p2, p3 -> searchCoffee() }
@@ -96,7 +80,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         SearchFactory.initialize(requireContext())
     }
 
-    val placeMarkTapListener: MapObjectTapListener = MapObjectTapListener { a, point ->
+    val placeMarkTapListener: MapObjectTapListener = MapObjectTapListener { placeMark, point ->
         showMessage("Нажата")
         binding.mapview.map.move(
             CameraPosition(
@@ -105,9 +89,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
             Animation(Animation.Type.SMOOTH, 0.5f)
         ) {
             viewModel.mapClick(
-                point.longitude.toFloat(),
-                point.latitude.toFloat(),
-                a.userData.toString()
+                placeMark.userData as CoffeeShop
             )
         }
         true
@@ -123,6 +105,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
             Animation(Animation.Type.SMOOTH, 0f),
             null
         )
+//        binding.mapview.map.addTapListener(tapListener)
         binding.mapview.map.addCameraListener(cameraListener)
         mapObjects = binding.mapview.map.mapObjects.addCollection()
         searchCoffee()
@@ -135,25 +118,35 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                         is MapViewModel.Event.NavigateToCoffee -> {
                             findNavController().navigate(
                                 R.id.action_map_to_coffee, bundleOf(
-                                    ARG_LON to event.longitude,
-                                    ARG_LAT to event.latitude,
-                                    ARG_NAME to event.nameCoffee
+                                    ARG_COFFEESHOP to event.coffeeShop
                                 )
                             )
                         }
                     }
                 }
         }
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.searchResult
                 .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
-                .collect { result ->
-                    Timber.d("Список $result")
+                .collect { coffeeShops: List<CoffeeShop> ->
+                    Timber.d("Список $coffeeShops")
+                    val imageProvider = DrawableImageProvider(
+                        requireContext(),
+                        R.drawable.ic_action_name
+                    )
+                    mapObjects.clear()
+                    coffeeShops.forEach {
+                        val placeMark = mapObjects.addPlacemark(
+                            Point(it.latitude.toDouble(), it.longitude.toDouble()),
+                            imageProvider
+                        )
+                        placeMark.addTapListener(placeMarkTapListener)
+                        placeMark.userData = it
+                    }
                 }
         }
-
     }
-
 
     override fun onStop() {
         binding.mapview.onStop()
@@ -172,7 +165,6 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
             SearchManagerType.ONLINE
         )
         val point = VisibleRegionUtils.toPolygon(binding.mapview.map.visibleRegion)
-//        Timber.d("выводим из searchCoffee ${point.boundingBox!!.northEast.latitude} ")
         searchSession = searchManager!!.submit(
             "кофейня",
             point,

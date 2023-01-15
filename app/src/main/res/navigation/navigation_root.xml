@@ -24,14 +24,8 @@
             android:id="@+id/action_map_to_coffee"
             app:destination="@+id/coffeeDialogFragment">
             <argument
-                android:name="ARG_LON"
-                app:argType="float" />
-            <argument
-                android:name="ARG_LAT"
-                app:argType="float" />
-            <argument
-                android:name="ARG_NAME"
-                app:argType="string" />
+                android:name="ARG_COFFEESHOP"
+                app:argType="ru.ll.coffeebonus.domain.CoffeeShop" />
         </action>
     </fragment>
 
@@ -41,13 +35,7 @@
         android:label="Coffee"
         tools:layout="@layout/fragment_coffee">
         <argument
-            android:name="ARG_LON"
-            app:argType="float" />
-        <argument
-            android:name="ARG_LAT"
-            app:argType="float" />
-        <argument
-            android:name="ARG_NAME"
-            app:argType="string" />
+            android:name="ARG_COFFEESHOP"
+            app:argType="ru.ll.coffeebonus.domain.CoffeeShop" />
     </dialog>
 </navigation>

@@ -8,16 +8,14 @@ import androidx.fragment.app.viewModels
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
 import ru.ll.coffeebonus.databinding.FragmentCoffeeBinding
-import timber.log.Timber
+import ru.ll.coffeebonus.domain.CoffeeShop
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class CoffeeFragment : BottomSheetDialogFragment() {
 
     companion object {
-        const val ARG_LON = "ARG_LON"
-        const val ARG_LAT = "ARG_LAT"
-        const val ARG_NAME = "ARG_NAME"
+        const val ARG_COFFEESHOP = "ARG_COFFEESHOP"
     }
 
     private var _binding: FragmentCoffeeBinding? = null
@@ -32,19 +30,15 @@ class CoffeeFragment : BottomSheetDialogFragment() {
     private val viewModel: CoffeeViewModel by viewModels {
         CoffeeViewModel.provideFactory(
             viewModelAssistedFactory,
-            requireArguments().getFloat(ARG_LAT),
-            requireArguments().getFloat(ARG_LON),
-            requireArguments().getString(ARG_NAME)!!
+            requireArguments().getSerializable(ARG_COFFEESHOP) as CoffeeShop
         )
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Timber.d("Широта ${viewModel.latitude}")
-        Timber.d("Долгота ${viewModel.longitude}")
-        binding.latitude.text = "Широта ${viewModel.latitude}"
-        binding.longitude.text = "Долгота ${viewModel.longitude}"
-        binding.coffeeName.text = "Название ${viewModel.nameCoffee}"
+        binding.latitude.text = "Широта ${viewModel.coffeeShop.latitude}"
+        binding.longitude.text = "Долгота ${viewModel.coffeeShop.longitude}"
+        binding.coffeeName.text = "Название ${viewModel.coffeeShop.name}"
     }
 
     override fun onCreateView(

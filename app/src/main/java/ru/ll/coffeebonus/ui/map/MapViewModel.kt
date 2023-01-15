@@ -18,9 +18,7 @@ class MapViewModel @Inject constructor(
 
     sealed class Event {
         data class NavigateToCoffee(
-            val longitude: Float,
-            val latitude: Float,
-            val nameCoffee: String
+            val coffeeShop: CoffeeShop
         ) : Event()
     }
 
@@ -31,9 +29,9 @@ class MapViewModel @Inject constructor(
     private val eventChannel = Channel<Event>(Channel.BUFFERED)
     val eventsFlow = eventChannel.receiveAsFlow()
 
-    fun mapClick(longitude: Float, latitude: Float, nameCoffee: String) {
+    fun mapClick(coffeeShop: CoffeeShop) {
         viewModelScope.launch {
-            eventChannel.send(Event.NavigateToCoffee(longitude, latitude, nameCoffee))
+            eventChannel.send(Event.NavigateToCoffee(coffeeShop))
         }
     }
 
