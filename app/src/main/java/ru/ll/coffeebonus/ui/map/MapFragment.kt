@@ -1,9 +1,13 @@
 package ru.ll.coffeebonus.ui.map
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
@@ -62,8 +66,44 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         }
     }
 
+    val locationPermissionRequest = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions: Map<String, Boolean> ->
+        when {
+            permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false -> {
+                // Precise location access granted.
+                Timber.d("Precise location access granted")
+            }
+            permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false -> {
+                // Only approximate location access granted.
+                Timber.d("Only approximate location access granted")
+            }
+            else -> {
+                // No location access granted.
+                Timber.d("No location access granted")
+            }
+        }
+    }
+
     val tapListener: GeoObjectTapListener = GeoObjectTapListener {
-        mapObjects.clear()
+        val coarseLocationGranted = ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+        val fineLocationGranted = ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+        if (coarseLocationGranted || fineLocationGranted) {
+            Timber.d("Разрешение выдано")
+        } else {
+            locationPermissionRequest.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
         true
     }
 
@@ -105,7 +145,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
             Animation(Animation.Type.SMOOTH, 0f),
             null
         )
-//        binding.mapview.map.addTapListener(tapListener)
+        binding.mapview.map.addTapListener(tapListener)
         binding.mapview.map.addCameraListener(cameraListener)
         mapObjects = binding.mapview.map.mapObjects.addCollection()
         searchCoffee()
