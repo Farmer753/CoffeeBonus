@@ -22,6 +22,7 @@ import com.yandex.mapkit.layers.GeoObjectTapListener
 import com.yandex.mapkit.map.*
 import com.yandex.mapkit.search.*
 import com.yandex.mapkit.uri.UriObjectMetadata
+import com.yandex.mapkit.user_location.UserLocationLayer
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import ru.ll.coffeebonus.R
@@ -66,6 +67,8 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         }
     }
 
+    var userLocationLayer: UserLocationLayer? = null
+
     val locationPermissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions: Map<String, Boolean> ->
@@ -86,24 +89,6 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
     }
 
     val tapListener: GeoObjectTapListener = GeoObjectTapListener {
-        val coarseLocationGranted = ContextCompat.checkSelfPermission(
-            requireContext(),
-            Manifest.permission.ACCESS_COARSE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
-        val fineLocationGranted = ContextCompat.checkSelfPermission(
-            requireContext(),
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
-        if (coarseLocationGranted || fineLocationGranted) {
-            Timber.d("Разрешение выдано")
-        } else {
-            locationPermissionRequest.launch(
-                arrayOf(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                )
-            )
-        }
         true
     }
 
@@ -138,13 +123,40 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Timber.d("переменная из MapFragment ${viewModel.test} ")
-        binding.mapview.map.move(
-            CameraPosition(
-                Point(59.938879, 30.315212), 15.0f, 0.0f, 0.0f
-            ),
-            Animation(Animation.Type.SMOOTH, 0f),
-            null
-        )
+        userLocationLayer = MapKitFactory.getInstance()
+            .createUserLocationLayer(binding.mapview.mapWindow)
+        userLocationLayer?.isVisible = true
+        if (permission()) {
+//            TODO: Подвинуть карту к местоположению юзера
+            Timber.d("Двигаем карту ${userLocationLayer}")
+            Timber.d("Двигаем карту ${userLocationLayer?.cameraPosition()}")
+            Timber.d("Двигаем карту ${userLocationLayer?.cameraPosition()?.target}")
+//            TODO: вытащить позицию пользователя
+//            userLocationLayer?.setObjectListener()
+            binding.mapview.map.move(
+                CameraPosition(
+                    userLocationLayer?.cameraPosition()?.target
+                        ?: Point(59.938879, 30.315212),
+                    15.0f, 0.0f, 0.0f
+                ),
+                Animation(Animation.Type.SMOOTH, 0f),
+                null
+            )
+        } else {
+            binding.mapview.map.move(
+                CameraPosition(
+                    Point(59.938879, 30.315212), 15.0f, 0.0f, 0.0f
+                ),
+                Animation(Animation.Type.SMOOTH, 0f),
+                null
+            )
+            locationPermissionRequest.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
         binding.mapview.map.addTapListener(tapListener)
         binding.mapview.map.addCameraListener(cameraListener)
         mapObjects = binding.mapview.map.mapObjects.addCollection()
@@ -211,5 +223,22 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
             SearchOptions(),
             searchListener
         )
+    }
+
+//    fun showUserLocation() {
+////binding.mapview.map.sublayerManager.
+//        UserLocationLayer
+//    }
+
+    fun permission(): Boolean {
+        val coarseLocationGranted = ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+        val fineLocationGranted = ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+        return coarseLocationGranted || fineLocationGranted
     }
 }
