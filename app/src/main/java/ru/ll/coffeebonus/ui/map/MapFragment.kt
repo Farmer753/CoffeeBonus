@@ -19,10 +19,14 @@ import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.layers.GeoObjectTapListener
+import com.yandex.mapkit.layers.ObjectEvent
+import com.yandex.mapkit.location.*
 import com.yandex.mapkit.map.*
 import com.yandex.mapkit.search.*
 import com.yandex.mapkit.uri.UriObjectMetadata
 import com.yandex.mapkit.user_location.UserLocationLayer
+import com.yandex.mapkit.user_location.UserLocationObjectListener
+import com.yandex.mapkit.user_location.UserLocationView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import ru.ll.coffeebonus.R
@@ -36,12 +40,19 @@ import timber.log.Timber
 @AndroidEntryPoint
 class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
 
+//    companion object {
+//        private const val DESIRED_ACCURACY = 0.0
+//        private const val MINIMAL_TIME: Long = 0
+//        private const val MINIMAL_DISTANCE = 50.0
+//        private const val USE_IN_BACKGROUND = false
+//    }
+
     lateinit var mapObjects: MapObjectCollection
     var searchManager: SearchManager? = null
     var searchSession: Session? = null
     val searchListener = object : Session.SearchListener {
         override fun onSearchResponse(response: Response) {
-            Timber.d("Ещё результаты ${searchSession!!.hasNextPage()}")
+//            Timber.d("Ещё результаты ${searchSession!!.hasNextPage()}")
             if (searchSession!!.hasNextPage()) {
                 searchSession!!.fetchNextPage(this)
             }
@@ -66,6 +77,58 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
             Timber.e("Error $p0")
         }
     }
+//
+//    var mapMoved = false
+//    var locationManager: LocationManager? = null
+//    val myLocationListener = object : LocationListener {
+//        override fun onLocationUpdated(p0: Location) {
+//            if (!mapMoved) {
+//                binding.mapview.map.move(
+//                    CameraPosition(
+//                        p0.position,
+//                        15.0f, 0.0f, 0.0f
+//                    ),
+//                    Animation(Animation.Type.SMOOTH, 0f),
+//                    null
+//                )
+//                mapMoved = true
+//            }
+//        }
+//
+//        override fun onLocationStatusUpdated(p0: LocationStatus) {
+//
+//        }
+//
+//    }
+//
+//    val userLocationObjectListener = object : UserLocationObjectListener {
+//        override fun onObjectAdded(p0: UserLocationView) {
+//            Timber.d(
+//                "Вызван метод onObjectAdded ${p0.arrow.geometry.latitude} ," +
+//                        "${p0.arrow.geometry.longitude}"
+//            )
+//            binding.mapview.map.move(
+//                CameraPosition(
+//                    p0.arrow.geometry,
+//                    15.0f, 0.0f, 0.0f
+//                ),
+//                Animation(Animation.Type.SMOOTH, 0f),
+//                null
+//            )
+//        }
+//
+//        override fun onObjectRemoved(p0: UserLocationView) {
+//            Timber.d("Вызван метод onObjectRemoved")
+//        }
+//
+//        override fun onObjectUpdated(p0: UserLocationView, p1: ObjectEvent) {
+//            Timber.d(
+//                "Вызван метод onObjectAdded ${p0.arrow.geometry.latitude} ," +
+//                        "${p0.arrow.geometry.longitude}"
+//            )
+//        }
+//
+//    }
 
     var userLocationLayer: UserLocationLayer? = null
 
@@ -123,8 +186,9 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Timber.d("переменная из MapFragment ${viewModel.test} ")
-        userLocationLayer = MapKitFactory.getInstance()
-            .createUserLocationLayer(binding.mapview.mapWindow)
+
+//        userLocationLayer = MapKitFactory.getInstance()
+//            .createUserLocationLayer(binding.mapview.mapWindow)
         userLocationLayer?.isVisible = true
         if (permission()) {
 //            TODO: Подвинуть карту к местоположению юзера
@@ -132,16 +196,17 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
             Timber.d("Двигаем карту ${userLocationLayer?.cameraPosition()}")
             Timber.d("Двигаем карту ${userLocationLayer?.cameraPosition()?.target}")
 //            TODO: вытащить позицию пользователя
-//            userLocationLayer?.setObjectListener()
-            binding.mapview.map.move(
-                CameraPosition(
-                    userLocationLayer?.cameraPosition()?.target
-                        ?: Point(59.938879, 30.315212),
-                    15.0f, 0.0f, 0.0f
-                ),
-                Animation(Animation.Type.SMOOTH, 0f),
-                null
-            )
+//            userLocationLayer?.setObjectListener(userLocationObjectListener)
+//            locationManager = MapKitFactory.getInstance().createLocationManager()
+//            locationManager?.subscribeForLocationUpdates(
+//                DESIRED_ACCURACY,
+//                MINIMAL_TIME,
+//                MINIMAL_DISTANCE,
+//                USE_IN_BACKGROUND,
+//                FilteringMode.OFF,
+//                myLocationListener
+//            )
+
         } else {
             binding.mapview.map.move(
                 CameraPosition(
@@ -182,7 +247,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
             viewModel.searchResult
                 .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
                 .collect { coffeeShops: List<CoffeeShop> ->
-                    Timber.d("Список $coffeeShops")
+//                    Timber.d("Список $coffeeShops")
                     val imageProvider = DrawableImageProvider(
                         requireContext(),
                         R.drawable.ic_action_name
