@@ -6,8 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.yandex.mapkit.geometry.Point
+import com.yandex.mapkit.map.CameraPosition
 import dagger.hilt.android.AndroidEntryPoint
+import ru.ll.coffeebonus.R
 import ru.ll.coffeebonus.databinding.FragmentCoffeeBinding
+import ru.ll.coffeebonus.di.util.DrawableImageProvider
 import ru.ll.coffeebonus.domain.CoffeeShop
 import javax.inject.Inject
 
@@ -36,9 +40,28 @@ class CoffeeFragment : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.latitude.text = "Широта ${viewModel.coffeeShop.latitude}"
-        binding.longitude.text = "Долгота ${viewModel.coffeeShop.longitude}"
-        binding.coffeeName.text = "Название ${viewModel.coffeeShop.name}"
+        binding.name.text = "Название ${viewModel.coffeeShop.name}"
+        binding.map.setNoninteractive(true)
+        val imageProvider = DrawableImageProvider(
+            requireContext(),
+            R.drawable.ic_action_name
+        )
+        binding.map.map.mapObjects.addPlacemark(
+            Point(
+                viewModel.coffeeShop.latitude.toDouble(),
+                viewModel.coffeeShop.longitude.toDouble()
+            ),
+            imageProvider
+        )
+        binding.map.map.move(
+            CameraPosition(
+                Point(
+                    viewModel.coffeeShop.latitude.toDouble(),
+                    viewModel.coffeeShop.longitude.toDouble()
+                ),
+                15.0f, 0.0f, 0.0f
+            )
+        )
     }
 
     override fun onCreateView(
