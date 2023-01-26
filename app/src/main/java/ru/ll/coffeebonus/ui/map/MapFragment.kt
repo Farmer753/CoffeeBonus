@@ -54,15 +54,36 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
             }
             viewModel.onSearchResult(
                 response.collection.children.map {
+//                    Timber.d(
+//                        "проверяем ${
+//                            it.obj?.metadataContainer?.getItem(ToponymObjectMetadata::class.java)
+//                        }"
+//                    )
+//                    Timber.d(
+//                        "проверяем ${
+//                            it.obj?.metadataContainer
+//                                ?.getItem(ToponymObjectMetadata::class.java)?.address
+//                        }"
+//                    )
+//                    Timber.d(
+//                        "проверяем ${
+//                            it.obj?.metadataContainer?.getItem(ToponymObjectMetadata::class.java)
+//                                ?.address
+//                                ?.formattedAddress
+//                        }"
+//                    )
                     CoffeeShop(
-                        it.obj?.metadataContainer?.getItem(UriObjectMetadata::class.java)
+                        id = it.obj?.metadataContainer?.getItem(UriObjectMetadata::class.java)
                             ?.uris
                             ?.firstOrNull()
                             ?.value
                             ?.toUri()?.getQueryParameter("oid")!!,
-                        it.obj?.name!!,
-                        it.obj?.geometry?.first()?.point!!.longitude.toFloat(),
-                        it.obj?.geometry?.first()?.point!!.latitude.toFloat()
+                        name = it.obj?.name!!,
+                        address = it.obj?.metadataContainer?.getItem(BusinessObjectMetadata::class.java)
+                            ?.address
+                            ?.formattedAddress ?: "",
+                        longitude = it.obj?.geometry?.first()?.point!!.longitude.toFloat(),
+                        latitude = it.obj?.geometry?.first()?.point!!.latitude.toFloat()
                     )
                 }
             )
@@ -91,6 +112,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                 imageProvider
             )
             if (!mapMoved) {
+//                TODO Навигироваться на центр СПБ
                 binding.mapview.map.move(
                     CameraPosition(
                         p0.position,
@@ -131,7 +153,13 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         true
     }
 
-    val cameraListener = CameraListener { p0, p1, p2, p3 -> searchCoffee() }
+    val cameraListener = CameraListener { p0, p1, p2, p3 ->
+        if (p1.zoom > 13.0f) {
+            searchCoffee()
+        } else {
+            Timber.d("Недостаточный zoom ${p1.zoom}")
+        }
+    }
 
     override val viewModel: MapViewModel by viewModels()
 
@@ -199,11 +227,16 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                 .collect { event ->
                     when (event) {
                         is MapViewModel.Event.NavigateToCoffee -> {
-                            findNavController().navigate(
-                                R.id.action_map_to_coffee, bundleOf(
-                                    ARG_COFFEESHOP to event.coffeeShop
+                            try {
+                                findNavController().navigate(
+                                    R.id.action_map_to_coffee, bundleOf(
+                                        ARG_COFFEESHOP to event.coffeeShop
+                                    )
                                 )
-                            )
+                            } catch (e: Throwable) {
+                                Timber.e(e, "Ошибка навигации")
+                            }
+
                         }
                     }
                 }
@@ -218,7 +251,8 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                         requireContext(),
                         R.drawable.ic_action_name
                     )
-                    mapObjects.clear()
+//                    TODO добавлять недобавленные маркеры
+//                    mapObjects.clear()
                     coffeeShops.forEach {
                         val placeMark = mapObjects.addPlacemark(
                             Point(it.latitude.toDouble(), it.longitude.toDouble()),
@@ -247,6 +281,8 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         searchManager = SearchFactory.getInstance().createSearchManager(
             SearchManagerType.ONLINE
         )
+//        val options = SearchOptions()
+//        options.snippets =
         val point = VisibleRegionUtils.toPolygon(binding.mapview.map.visibleRegion)
         searchSession = searchManager!!.submit(
             "кофейня",

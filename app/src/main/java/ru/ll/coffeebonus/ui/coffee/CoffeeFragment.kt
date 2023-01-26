@@ -41,6 +41,7 @@ class CoffeeFragment : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.name.text = "Название ${viewModel.coffeeShop.name}"
+        binding.address.text = "Адрес ${viewModel.coffeeShop.address}"
         binding.map.setNoninteractive(true)
         val imageProvider = DrawableImageProvider(
             requireContext(),
