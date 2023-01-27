@@ -54,24 +54,6 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
             }
             viewModel.onSearchResult(
                 response.collection.children.map {
-//                    Timber.d(
-//                        "проверяем ${
-//                            it.obj?.metadataContainer?.getItem(ToponymObjectMetadata::class.java)
-//                        }"
-//                    )
-//                    Timber.d(
-//                        "проверяем ${
-//                            it.obj?.metadataContainer
-//                                ?.getItem(ToponymObjectMetadata::class.java)?.address
-//                        }"
-//                    )
-//                    Timber.d(
-//                        "проверяем ${
-//                            it.obj?.metadataContainer?.getItem(ToponymObjectMetadata::class.java)
-//                                ?.address
-//                                ?.formattedAddress
-//                        }"
-//                    )
                     CoffeeShop(
                         id = it.obj?.metadataContainer?.getItem(UriObjectMetadata::class.java)
                             ?.uris
@@ -112,7 +94,6 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                 imageProvider
             )
             if (!mapMoved) {
-//                TODO Навигироваться на центр СПБ
                 binding.mapview.map.move(
                     CameraPosition(
                         p0.position,
@@ -128,7 +109,6 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         override fun onLocationStatusUpdated(p0: LocationStatus) {
         }
     }
-
 
     val locationPermissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -156,8 +136,6 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
     val cameraListener = CameraListener { p0, p1, p2, p3 ->
         if (p1.zoom > 13.0f) {
             searchCoffee()
-        } else {
-            Timber.d("Недостаточный zoom ${p1.zoom}")
         }
     }
 
@@ -219,7 +197,6 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         binding.mapview.map.addTapListener(tapListener)
         binding.mapview.map.addCameraListener(cameraListener)
         mapObjects = binding.mapview.map.mapObjects.addCollection()
-        searchCoffee()
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.eventsFlow
@@ -281,8 +258,6 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         searchManager = SearchFactory.getInstance().createSearchManager(
             SearchManagerType.ONLINE
         )
-//        val options = SearchOptions()
-//        options.snippets =
         val point = VisibleRegionUtils.toPolygon(binding.mapview.map.visibleRegion)
         searchSession = searchManager!!.submit(
             "кофейня",
