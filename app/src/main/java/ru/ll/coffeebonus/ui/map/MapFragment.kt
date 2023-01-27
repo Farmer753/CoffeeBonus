@@ -228,9 +228,41 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                         requireContext(),
                         R.drawable.ic_action_name
                     )
-//                    TODO добавлять недобавленные маркеры
-//                    mapObjects.clear()
-                    coffeeShops.forEach {
+                    val shownCoffeeShopsIds = mutableListOf<String>()
+                    mapObjects.traverse(object : MapObjectVisitor {
+                        override fun onPlacemarkVisited(p0: PlacemarkMapObject) {
+                            shownCoffeeShopsIds.add((p0.userData as CoffeeShop).id)
+                        }
+
+                        override fun onPolylineVisited(p0: PolylineMapObject) {
+                        }
+
+                        override fun onPolygonVisited(p0: PolygonMapObject) {
+                        }
+
+                        override fun onCircleVisited(p0: CircleMapObject) {
+                        }
+
+                        override fun onCollectionVisitStart(p0: MapObjectCollection): Boolean {
+                            return true
+                        }
+
+                        override fun onCollectionVisitEnd(p0: MapObjectCollection) {
+                        }
+
+                        override fun onClusterizedCollectionVisitStart(p0: ClusterizedPlacemarkCollection)
+                                : Boolean {
+                            return true
+                        }
+
+                        override fun onClusterizedCollectionVisitEnd(p0: ClusterizedPlacemarkCollection) {
+                        }
+                    })
+                    Timber.d("Список id $shownCoffeeShopsIds")
+
+                    coffeeShops.filter {
+                        !shownCoffeeShopsIds.contains(it.id)
+                    }.forEach {
                         val placeMark = mapObjects.addPlacemark(
                             Point(it.latitude.toDouble(), it.longitude.toDouble()),
                             imageProvider
