@@ -27,10 +27,11 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import ru.ll.coffeebonus.R
 import ru.ll.coffeebonus.databinding.FragmentMapBinding
-import ru.ll.coffeebonus.di.util.DrawableImageProvider
 import ru.ll.coffeebonus.domain.CoffeeShop
 import ru.ll.coffeebonus.ui.BaseFragment
 import ru.ll.coffeebonus.ui.coffee.CoffeeFragment.Companion.ARG_COFFEESHOP
+import ru.ll.coffeebonus.util.DrawableImageProvider
+import ru.ll.coffeebonus.util.MyMapObjectVisitor
 import timber.log.Timber
 
 @AndroidEntryPoint
@@ -55,14 +56,17 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
             viewModel.onSearchResult(
                 response.collection.children.map {
                     CoffeeShop(
-                        it.obj?.metadataContainer?.getItem(UriObjectMetadata::class.java)
+                        id = it.obj?.metadataContainer?.getItem(UriObjectMetadata::class.java)
                             ?.uris
                             ?.firstOrNull()
                             ?.value
                             ?.toUri()?.getQueryParameter("oid")!!,
-                        it.obj?.name!!,
-                        it.obj?.geometry?.first()?.point!!.longitude.toFloat(),
-                        it.obj?.geometry?.first()?.point!!.latitude.toFloat()
+                        name = it.obj?.name!!,
+                        address = it.obj?.metadataContainer?.getItem(BusinessObjectMetadata::class.java)
+                            ?.address
+                            ?.formattedAddress ?: "",
+                        longitude = it.obj?.geometry?.first()?.point!!.longitude.toFloat(),
+                        latitude = it.obj?.geometry?.first()?.point!!.latitude.toFloat()
                     )
                 }
             )
@@ -107,7 +111,6 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         }
     }
 
-
     val locationPermissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions: Map<String, Boolean> ->
@@ -131,7 +134,11 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         true
     }
 
-    val cameraListener = CameraListener { p0, p1, p2, p3 -> searchCoffee() }
+    val cameraListener = CameraListener { p0, p1, p2, p3 ->
+        if (p1.zoom > 13.0f) {
+            searchCoffee()
+        }
+    }
 
     override val viewModel: MapViewModel by viewModels()
 
@@ -191,7 +198,6 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         binding.mapview.map.addTapListener(tapListener)
         binding.mapview.map.addCameraListener(cameraListener)
         mapObjects = binding.mapview.map.mapObjects.addCollection()
-        searchCoffee()
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.eventsFlow
@@ -199,11 +205,16 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                 .collect { event ->
                     when (event) {
                         is MapViewModel.Event.NavigateToCoffee -> {
-                            findNavController().navigate(
-                                R.id.action_map_to_coffee, bundleOf(
-                                    ARG_COFFEESHOP to event.coffeeShop
+                            try {
+                                findNavController().navigate(
+                                    R.id.action_map_to_coffee, bundleOf(
+                                        ARG_COFFEESHOP to event.coffeeShop
+                                    )
                                 )
-                            )
+                            } catch (e: Throwable) {
+                                Timber.e(e, "Ошибка навигации")
+                            }
+
                         }
                     }
                 }
@@ -218,8 +229,17 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                         requireContext(),
                         R.drawable.ic_action_name
                     )
-                    mapObjects.clear()
-                    coffeeShops.forEach {
+                    val shownCoffeeShopsIds = mutableListOf<String>()
+                    mapObjects.traverse(object : MyMapObjectVisitor {
+                        override fun onPlacemarkVisited(p0: PlacemarkMapObject) {
+                            shownCoffeeShopsIds.add((p0.userData as CoffeeShop).id)
+                        }
+                    })
+                    Timber.d("Список id $shownCoffeeShopsIds")
+
+                    coffeeShops.filter {
+                        !shownCoffeeShopsIds.contains(it.id)
+                    }.forEach {
                         val placeMark = mapObjects.addPlacemark(
                             Point(it.latitude.toDouble(), it.longitude.toDouble()),
                             imageProvider

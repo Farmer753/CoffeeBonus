@@ -1,4 +1,4 @@
-package ru.ll.coffeebonus.di.util
+package ru.ll.coffeebonus.util
 
 import android.content.Context
 import androidx.annotation.DrawableRes
