@@ -27,10 +27,11 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import ru.ll.coffeebonus.R
 import ru.ll.coffeebonus.databinding.FragmentMapBinding
-import ru.ll.coffeebonus.di.util.DrawableImageProvider
 import ru.ll.coffeebonus.domain.CoffeeShop
 import ru.ll.coffeebonus.ui.BaseFragment
 import ru.ll.coffeebonus.ui.coffee.CoffeeFragment.Companion.ARG_COFFEESHOP
+import ru.ll.coffeebonus.util.DrawableImageProvider
+import ru.ll.coffeebonus.util.MyMapObjectVisitor
 import timber.log.Timber
 
 @AndroidEntryPoint
@@ -229,33 +230,9 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                         R.drawable.ic_action_name
                     )
                     val shownCoffeeShopsIds = mutableListOf<String>()
-                    mapObjects.traverse(object : MapObjectVisitor {
+                    mapObjects.traverse(object : MyMapObjectVisitor {
                         override fun onPlacemarkVisited(p0: PlacemarkMapObject) {
                             shownCoffeeShopsIds.add((p0.userData as CoffeeShop).id)
-                        }
-
-                        override fun onPolylineVisited(p0: PolylineMapObject) {
-                        }
-
-                        override fun onPolygonVisited(p0: PolygonMapObject) {
-                        }
-
-                        override fun onCircleVisited(p0: CircleMapObject) {
-                        }
-
-                        override fun onCollectionVisitStart(p0: MapObjectCollection): Boolean {
-                            return true
-                        }
-
-                        override fun onCollectionVisitEnd(p0: MapObjectCollection) {
-                        }
-
-                        override fun onClusterizedCollectionVisitStart(p0: ClusterizedPlacemarkCollection)
-                                : Boolean {
-                            return true
-                        }
-
-                        override fun onClusterizedCollectionVisitEnd(p0: ClusterizedPlacemarkCollection) {
                         }
                     })
                     Timber.d("Список id $shownCoffeeShopsIds")

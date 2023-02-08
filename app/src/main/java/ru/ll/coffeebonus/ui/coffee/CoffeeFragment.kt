@@ -11,7 +11,7 @@ import com.yandex.mapkit.map.CameraPosition
 import dagger.hilt.android.AndroidEntryPoint
 import ru.ll.coffeebonus.R
 import ru.ll.coffeebonus.databinding.FragmentCoffeeBinding
-import ru.ll.coffeebonus.di.util.DrawableImageProvider
+import ru.ll.coffeebonus.util.DrawableImageProvider
 import ru.ll.coffeebonus.domain.CoffeeShop
 import javax.inject.Inject
 
