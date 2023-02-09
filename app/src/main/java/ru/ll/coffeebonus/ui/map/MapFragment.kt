@@ -44,7 +44,17 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         private const val USE_IN_BACKGROUND = false
     }
 
-    lateinit var mapObjects: MapObjectCollection
+    private val clusterListener: ClusterListener =
+        ClusterListener {
+            val imageProvider = DrawableImageProvider(
+                requireContext(),
+                R.drawable.ic_cluster
+            )
+            it.appearance.setIcon(imageProvider)
+            Timber.d("ClusterListener $it")
+        }
+    val shownPlacemarks = mutableSetOf<PlacemarkMapObject>()
+    lateinit var mapObjects: ClusterizedPlacemarkCollection
     var searchManager: SearchManager? = null
     var searchSession: Session? = null
     val searchListener = object : Session.SearchListener {
@@ -197,7 +207,8 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         }
         binding.mapview.map.addTapListener(tapListener)
         binding.mapview.map.addCameraListener(cameraListener)
-        mapObjects = binding.mapview.map.mapObjects.addCollection()
+        mapObjects =
+            binding.mapview.map.mapObjects.addClusterizedPlacemarkCollection(clusterListener)
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.eventsFlow
@@ -206,6 +217,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                     when (event) {
                         is MapViewModel.Event.NavigateToCoffee -> {
                             try {
+                                Timber.d("event ${event.coffeeShop}")
                                 findNavController().navigate(
                                     R.id.action_map_to_coffee, bundleOf(
                                         ARG_COFFEESHOP to event.coffeeShop
@@ -214,7 +226,6 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                             } catch (e: Throwable) {
                                 Timber.e(e, "Ошибка навигации")
                             }
-
                         }
                     }
                 }
@@ -230,23 +241,39 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                         R.drawable.ic_action_name
                     )
                     val shownCoffeeShopsIds = mutableListOf<String>()
-                    mapObjects.traverse(object : MyMapObjectVisitor {
+                    binding.mapview.map.mapObjects.traverse(object : MyMapObjectVisitor {
                         override fun onPlacemarkVisited(p0: PlacemarkMapObject) {
-                            shownCoffeeShopsIds.add((p0.userData as CoffeeShop).id)
+//                            TODO
+                            Timber.d("выводим из p0 ${p0.javaClass}")
+                            if (p0.userData != null) {
+                                shownCoffeeShopsIds.add((p0.userData as CoffeeShop).id)
+                            }
                         }
                     })
                     Timber.d("Список id $shownCoffeeShopsIds")
 
-                    coffeeShops.filter {
+//                    coffeeShops.filter {
+//                        !shownCoffeeShopsIds.contains(it.id)
+//                    }.forEach {
+//                        val placeMark = mapObjects.addPlacemark(
+//                            Point(it.latitude.toDouble(), it.longitude.toDouble()),
+//                            imageProvider
+//                        )
+//                        placeMark.addTapListener(placeMarkTapListener)
+//                        placeMark.userData = it
+//                    }
+                    shownPlacemarks += coffeeShops.filter {
                         !shownCoffeeShopsIds.contains(it.id)
-                    }.forEach {
-                        val placeMark = mapObjects.addPlacemark(
+                    }.map {
+                        val placeMark: PlacemarkMapObject = mapObjects.addPlacemark(
                             Point(it.latitude.toDouble(), it.longitude.toDouble()),
                             imageProvider
                         )
                         placeMark.addTapListener(placeMarkTapListener)
                         placeMark.userData = it
+                        return@map placeMark
                     }
+                    mapObjects.clusterPlacemarks(60.0, 15)
                 }
         }
     }
