@@ -44,12 +44,29 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         private const val USE_IN_BACKGROUND = false
     }
 
+    private val clusterTapListener: ClusterTapListener = ClusterTapListener {
+        Timber.d("Размер placemarks ${it.placemarks.size}")
+        it.placemarks.forEach { placemarkMapObject ->
+            Timber.d("название ${(placemarkMapObject.userData as CoffeeShop).id}")
+        }
+        binding.mapview.map.move(
+            CameraPosition(
+                it.placemarks[0].geometry,
+                binding.mapview.map.cameraPosition.zoom + 1, 0.0f, 0.0f
+            ),
+            Animation(Animation.Type.SMOOTH, 0f),
+            null
+        )
+        true
+    }
+
     private val clusterListener: ClusterListener =
         ClusterListener {
             val imageProvider = DrawableImageProvider(
                 requireContext(),
                 R.drawable.ic_cluster
             )
+            it.addClusterTapListener(clusterTapListener)
             it.appearance.setIcon(imageProvider)
             Timber.d("ClusterListener $it")
         }
@@ -273,7 +290,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                         placeMark.userData = it
                         return@map placeMark
                     }
-                    mapObjects.clusterPlacemarks(60.0, 15)
+                    mapObjects.clusterPlacemarks(200.0, 15)
                 }
         }
     }
