@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -31,7 +30,6 @@ import ru.ll.coffeebonus.domain.CoffeeShop
 import ru.ll.coffeebonus.ui.BaseFragment
 import ru.ll.coffeebonus.ui.coffee.CoffeeFragment.Companion.ARG_COFFEESHOP
 import ru.ll.coffeebonus.util.DrawableImageProvider
-import ru.ll.coffeebonus.util.MyMapObjectVisitor
 import timber.log.Timber
 
 @AndroidEntryPoint
@@ -46,9 +44,6 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
 
     private val clusterTapListener: ClusterTapListener = ClusterTapListener {
         Timber.d("Размер placemarks ${it.placemarks.size}")
-        it.placemarks.forEach { placemarkMapObject ->
-            Timber.d("название ${(placemarkMapObject.userData as CoffeeShop).id}")
-        }
         binding.mapview.map.move(
             CameraPosition(
                 it.placemarks[0].geometry,
@@ -68,7 +63,6 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
             )
             it.addClusterTapListener(clusterTapListener)
             it.appearance.setIcon(imageProvider)
-            Timber.d("ClusterListener $it")
         }
     val shownPlacemarks = mutableSetOf<PlacemarkMapObject>()
     lateinit var mapObjects: ClusterizedPlacemarkCollection
@@ -193,7 +187,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         true
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: android.view.View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Timber.d("переменная из MapFragment ${viewModel.test} ")
         if (permission()) {
@@ -206,7 +200,6 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                 FilteringMode.OFF,
                 myLocationListener
             )
-
         } else {
             binding.mapview.map.move(
                 CameraPosition(
@@ -252,33 +245,12 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
             viewModel.searchResult
                 .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
                 .collect { coffeeShops: List<CoffeeShop> ->
-//                    Timber.d("Список $coffeeShops")
                     val imageProvider = DrawableImageProvider(
                         requireContext(),
                         R.drawable.ic_action_name
                     )
-                    val shownCoffeeShopsIds = mutableListOf<String>()
-                    binding.mapview.map.mapObjects.traverse(object : MyMapObjectVisitor {
-                        override fun onPlacemarkVisited(p0: PlacemarkMapObject) {
-//                            TODO
-                            Timber.d("выводим из p0 ${p0.javaClass}")
-                            if (p0.userData != null) {
-                                shownCoffeeShopsIds.add((p0.userData as CoffeeShop).id)
-                            }
-                        }
-                    })
-                    Timber.d("Список id $shownCoffeeShopsIds")
 
-//                    coffeeShops.filter {
-//                        !shownCoffeeShopsIds.contains(it.id)
-//                    }.forEach {
-//                        val placeMark = mapObjects.addPlacemark(
-//                            Point(it.latitude.toDouble(), it.longitude.toDouble()),
-//                            imageProvider
-//                        )
-//                        placeMark.addTapListener(placeMarkTapListener)
-//                        placeMark.userData = it
-//                    }
+                    val shownCoffeeShopsIds = shownPlacemarks.map { (it.userData as CoffeeShop).id }
                     shownPlacemarks += coffeeShops.filter {
                         !shownCoffeeShopsIds.contains(it.id)
                     }.map {
