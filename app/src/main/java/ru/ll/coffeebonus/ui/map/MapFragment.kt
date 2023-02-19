@@ -249,7 +249,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                         requireContext(),
                         R.drawable.ic_action_name
                     )
-
+                    val oldShownPlacemarks = shownPlacemarks.size
                     val shownCoffeeShopsIds = shownPlacemarks.map { (it.userData as CoffeeShop).id }
                     shownPlacemarks += coffeeShops.filter {
                         !shownCoffeeShopsIds.contains(it.id)
@@ -262,7 +262,9 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                         placeMark.userData = it
                         return@map placeMark
                     }
-                    mapObjects.clusterPlacemarks(200.0, 15)
+                    if (oldShownPlacemarks != shownPlacemarks.size) {
+                        mapObjects.clusterPlacemarks(200.0, 15)
+                    }
                 }
         }
     }
