@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -31,8 +30,8 @@ import ru.ll.coffeebonus.domain.CoffeeShop
 import ru.ll.coffeebonus.ui.BaseFragment
 import ru.ll.coffeebonus.ui.coffee.CoffeeFragment.Companion.ARG_COFFEESHOP
 import ru.ll.coffeebonus.util.DrawableImageProvider
-import ru.ll.coffeebonus.util.MyMapObjectVisitor
 import timber.log.Timber
+import java.lang.Float.max
 
 @AndroidEntryPoint
 class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
@@ -41,10 +40,37 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         private const val DESIRED_ACCURACY = 0.0
         private const val MINIMAL_TIME: Long = 0
         private const val MINIMAL_DISTANCE = 50.0
+        private const val COFFEE_SHOP_SEARCH_ZOOM_DEFAULT = 13f
+        private const val COFFEE_SHOP_ZOOM_DEFAULT = 14f
+        private const val USER_ZOOM_DEFAULT = 15f
         private const val USE_IN_BACKGROUND = false
+        private const val ANIMATION_DURATION = .5f
     }
 
-    lateinit var mapObjects: MapObjectCollection
+    private val clusterTapListener: ClusterTapListener = ClusterTapListener {
+        Timber.d("Размер placemarks ${it.placemarks.size}")
+        binding.mapview.map.move(
+            CameraPosition(
+                it.placemarks[0].geometry,
+                binding.mapview.map.cameraPosition.zoom + 1, 0.0f, 0.0f
+            ),
+            Animation(Animation.Type.SMOOTH, ANIMATION_DURATION),
+            null
+        )
+        true
+    }
+
+    private val clusterListener: ClusterListener =
+        ClusterListener {
+            val imageProvider = DrawableImageProvider(
+                requireContext(),
+                R.drawable.ic_cluster
+            )
+            it.addClusterTapListener(clusterTapListener)
+            it.appearance.setIcon(imageProvider)
+        }
+    val shownPlacemarks = mutableSetOf<PlacemarkMapObject>()
+    lateinit var mapObjects: ClusterizedPlacemarkCollection
     var searchManager: SearchManager? = null
     var searchSession: Session? = null
     val searchListener = object : Session.SearchListener {
@@ -98,9 +124,9 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                 binding.mapview.map.move(
                     CameraPosition(
                         p0.position,
-                        15.0f, 0.0f, 0.0f
+                        USER_ZOOM_DEFAULT, 0.0f, 0.0f
                     ),
-                    Animation(Animation.Type.SMOOTH, 0f),
+                    Animation(Animation.Type.SMOOTH, ANIMATION_DURATION),
                     null
                 )
                 mapMoved = true
@@ -135,7 +161,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
     }
 
     val cameraListener = CameraListener { p0, p1, p2, p3 ->
-        if (p1.zoom > 13.0f) {
+        if (p1.zoom > COFFEE_SHOP_SEARCH_ZOOM_DEFAULT) {
             searchCoffee()
         }
     }
@@ -153,11 +179,12 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
 
     val placeMarkTapListener: MapObjectTapListener = MapObjectTapListener { placeMark, point ->
         showMessage("Нажата")
+        val zoom = max(COFFEE_SHOP_ZOOM_DEFAULT, binding.mapview.map.cameraPosition.zoom)
         binding.mapview.map.move(
             CameraPosition(
-                point, 14.0f, 0.0f, 0.0f
+                point, zoom, 0.0f, 0.0f
             ),
-            Animation(Animation.Type.SMOOTH, 0.5f)
+            Animation(Animation.Type.SMOOTH, ANIMATION_DURATION)
         ) {
             viewModel.mapClick(
                 placeMark.userData as CoffeeShop
@@ -166,7 +193,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         true
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: android.view.View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Timber.d("переменная из MapFragment ${viewModel.test} ")
         if (permission()) {
@@ -179,13 +206,12 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                 FilteringMode.OFF,
                 myLocationListener
             )
-
         } else {
             binding.mapview.map.move(
                 CameraPosition(
                     Point(59.938879, 30.315212), 15.0f, 0.0f, 0.0f
                 ),
-                Animation(Animation.Type.SMOOTH, 0f),
+                Animation(Animation.Type.SMOOTH, ANIMATION_DURATION),
                 null
             )
             locationPermissionRequest.launch(
@@ -197,7 +223,8 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         }
         binding.mapview.map.addTapListener(tapListener)
         binding.mapview.map.addCameraListener(cameraListener)
-        mapObjects = binding.mapview.map.mapObjects.addCollection()
+        mapObjects =
+            binding.mapview.map.mapObjects.addClusterizedPlacemarkCollection(clusterListener)
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.eventsFlow
@@ -206,6 +233,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                     when (event) {
                         is MapViewModel.Event.NavigateToCoffee -> {
                             try {
+                                Timber.d("event ${event.coffeeShop}")
                                 findNavController().navigate(
                                     R.id.action_map_to_coffee, bundleOf(
                                         ARG_COFFEESHOP to event.coffeeShop
@@ -214,7 +242,6 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                             } catch (e: Throwable) {
                                 Timber.e(e, "Ошибка навигации")
                             }
-
                         }
                     }
                 }
@@ -224,28 +251,25 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
             viewModel.searchResult
                 .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
                 .collect { coffeeShops: List<CoffeeShop> ->
-//                    Timber.d("Список $coffeeShops")
                     val imageProvider = DrawableImageProvider(
                         requireContext(),
                         R.drawable.ic_action_name
                     )
-                    val shownCoffeeShopsIds = mutableListOf<String>()
-                    mapObjects.traverse(object : MyMapObjectVisitor {
-                        override fun onPlacemarkVisited(p0: PlacemarkMapObject) {
-                            shownCoffeeShopsIds.add((p0.userData as CoffeeShop).id)
-                        }
-                    })
-                    Timber.d("Список id $shownCoffeeShopsIds")
-
-                    coffeeShops.filter {
+                    val oldShownPlacemarks = shownPlacemarks.size
+                    val shownCoffeeShopsIds = shownPlacemarks.map { (it.userData as CoffeeShop).id }
+                    shownPlacemarks += coffeeShops.filter {
                         !shownCoffeeShopsIds.contains(it.id)
-                    }.forEach {
-                        val placeMark = mapObjects.addPlacemark(
+                    }.map {
+                        val placeMark: PlacemarkMapObject = mapObjects.addPlacemark(
                             Point(it.latitude.toDouble(), it.longitude.toDouble()),
                             imageProvider
                         )
                         placeMark.addTapListener(placeMarkTapListener)
                         placeMark.userData = it
+                        return@map placeMark
+                    }
+                    if (oldShownPlacemarks != shownPlacemarks.size) {
+                        mapObjects.clusterPlacemarks(200.0, 15)
                     }
                 }
         }
