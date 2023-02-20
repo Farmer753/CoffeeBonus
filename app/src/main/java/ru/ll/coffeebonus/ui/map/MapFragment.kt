@@ -31,6 +31,7 @@ import ru.ll.coffeebonus.ui.BaseFragment
 import ru.ll.coffeebonus.ui.coffee.CoffeeFragment.Companion.ARG_COFFEESHOP
 import ru.ll.coffeebonus.util.DrawableImageProvider
 import timber.log.Timber
+import java.lang.Float.max
 
 @AndroidEntryPoint
 class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
@@ -39,7 +40,11 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         private const val DESIRED_ACCURACY = 0.0
         private const val MINIMAL_TIME: Long = 0
         private const val MINIMAL_DISTANCE = 50.0
+        private const val COFFEE_SHOP_SEARCH_ZOOM_DEFAULT = 13f
+        private const val COFFEE_SHOP_ZOOM_DEFAULT = 14f
+        private const val USER_ZOOM_DEFAULT = 15f
         private const val USE_IN_BACKGROUND = false
+        private const val ANIMATION_DURATION = .5f
     }
 
     private val clusterTapListener: ClusterTapListener = ClusterTapListener {
@@ -49,7 +54,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                 it.placemarks[0].geometry,
                 binding.mapview.map.cameraPosition.zoom + 1, 0.0f, 0.0f
             ),
-            Animation(Animation.Type.SMOOTH, 0f),
+            Animation(Animation.Type.SMOOTH, ANIMATION_DURATION),
             null
         )
         true
@@ -119,9 +124,9 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                 binding.mapview.map.move(
                     CameraPosition(
                         p0.position,
-                        15.0f, 0.0f, 0.0f
+                        USER_ZOOM_DEFAULT, 0.0f, 0.0f
                     ),
-                    Animation(Animation.Type.SMOOTH, 0f),
+                    Animation(Animation.Type.SMOOTH, ANIMATION_DURATION),
                     null
                 )
                 mapMoved = true
@@ -156,7 +161,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
     }
 
     val cameraListener = CameraListener { p0, p1, p2, p3 ->
-        if (p1.zoom > 13.0f) {
+        if (p1.zoom > COFFEE_SHOP_SEARCH_ZOOM_DEFAULT) {
             searchCoffee()
         }
     }
@@ -174,11 +179,12 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
 
     val placeMarkTapListener: MapObjectTapListener = MapObjectTapListener { placeMark, point ->
         showMessage("Нажата")
+        val zoom = max(COFFEE_SHOP_ZOOM_DEFAULT, binding.mapview.map.cameraPosition.zoom)
         binding.mapview.map.move(
             CameraPosition(
-                point, 14.0f, 0.0f, 0.0f
+                point, zoom, 0.0f, 0.0f
             ),
-            Animation(Animation.Type.SMOOTH, 0.5f)
+            Animation(Animation.Type.SMOOTH, ANIMATION_DURATION)
         ) {
             viewModel.mapClick(
                 placeMark.userData as CoffeeShop
@@ -205,7 +211,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                 CameraPosition(
                     Point(59.938879, 30.315212), 15.0f, 0.0f, 0.0f
                 ),
-                Animation(Animation.Type.SMOOTH, 0f),
+                Animation(Animation.Type.SMOOTH, ANIMATION_DURATION),
                 null
             )
             locationPermissionRequest.launch(
