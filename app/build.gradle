@@ -63,4 +63,6 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4'
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.5.1"
 
+//       google auth
+    implementation 'com.google.android.gms:play-services-auth:20.4.1'
 }

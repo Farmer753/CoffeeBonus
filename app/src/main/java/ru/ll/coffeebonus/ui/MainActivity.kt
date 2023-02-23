@@ -12,8 +12,6 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
-    @Inject
-    lateinit var test: String
 
     @Inject
     lateinit var viewModelAssistedFactory: MainActivityViewModel.Factory
@@ -22,16 +20,9 @@ class MainActivity : AppCompatActivity() {
         MainActivityViewModel.provideFactory(viewModelAssistedFactory, "String Id")
     }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        Timber.d("переменная $test")
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Timber.d("onDestroy")
     }
 
 }

@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Coffee bonus</string>
     <string name="profile">profile</string>
+    <string name="enter">Войти</string>
+    <string name="login">Авторизация</string>
+    <string name="your_web_client_id">524045930865-b5kp1l8sth67lq8duv8n76i8bmasob2d.apps.googleusercontent.com</string>
 </resources>

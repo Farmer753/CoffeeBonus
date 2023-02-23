@@ -27,6 +27,9 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding, ProfileViewModel>()
         binding.buttonMap.setOnClickListener {
             findNavController().navigate(R.id.action_profile_to_map)
         }
+        binding.buttonLogin.setOnClickListener {
+            findNavController().navigate(R.id.action_profile_to_login)
+        }
     }
 
 }

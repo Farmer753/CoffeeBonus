@@ -35,8 +35,6 @@ class MainActivityViewModel @AssistedInject constructor(
         Timber.d("Переменная $stringId из init MainActivityViewModel")
     }
 
-
-
     fun test() {
         Timber.d("Новая переменная $test из метода test MainActivityViewModel")
     }
