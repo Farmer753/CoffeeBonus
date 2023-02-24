@@ -13,11 +13,14 @@ import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.CommonStatusCodes
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import dagger.hilt.android.AndroidEntryPoint
 import ru.ll.coffeebonus.R
 import ru.ll.coffeebonus.databinding.FragmentLoginBinding
 import ru.ll.coffeebonus.ui.BaseFragment
 import timber.log.Timber
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class LoginFragment : BaseFragment<FragmentLoginBinding, LoginViewModel>() {
@@ -27,10 +30,11 @@ class LoginFragment : BaseFragment<FragmentLoginBinding, LoginViewModel>() {
     }
 
     override val viewModel: LoginViewModel by viewModels()
-
     private lateinit var oneTapClient: SignInClient
     private lateinit var signInRequest: BeginSignInRequest
-//    val auth: FirebaseAuth by inject()
+
+    @Inject
+    lateinit var auth: FirebaseAuth
 
     override val bindingInflater: (LayoutInflater, ViewGroup?, Boolean) -> FragmentLoginBinding
         get() = FragmentLoginBinding::inflate
@@ -116,23 +120,23 @@ class LoginFragment : BaseFragment<FragmentLoginBinding, LoginViewModel>() {
                     val credential = oneTapClient.getSignInCredentialFromIntent(data)
                     val idToken = credential.googleIdToken!!
                     Timber.d("пользователь ${credential.displayName}")
-                    // Initialize Firebase Auth
-//                    val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
-//                    auth.signInWithCredential(firebaseCredential)
-//                        .addOnCompleteListener(requireActivity()) { task ->
-//                            if (task.isSuccessful) {
-//                                // Sign in success, update UI with the signed-in user's information
-//                                Timber.d("signInWithCredential:success")
-//                            } else {
-//                                // If sign in fails, display a message to the user.
-//                                Timber.w("signInWithCredential:failure", task.exception)
-//                                Toast.makeText(
-//                                    requireContext(),
-//                                    "Не удалось авторизоваться в firebase ${task.exception?.message}",
-//                                    Toast.LENGTH_LONG
-//                                ).show()
-//                            }
-//                        }
+//                    Initialize Firebase Auth
+                    val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
+                    auth.signInWithCredential(firebaseCredential)
+                        .addOnCompleteListener(requireActivity()) { task ->
+                            if (task.isSuccessful) {
+                                // Sign in success, update UI with the signed-in user's information
+                                Timber.d("signInWithCredential:success")
+                            } else {
+                                // If sign in fails, display a message to the user.
+                                Timber.w("signInWithCredential:failure", task.exception)
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Не удалось авторизоваться в firebase ${task.exception?.message}",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        }
 
                 } catch (e: ApiException) {
                     Timber.e(e, "Ошибка логина в гугл, статускод = ${e.statusCode}")
