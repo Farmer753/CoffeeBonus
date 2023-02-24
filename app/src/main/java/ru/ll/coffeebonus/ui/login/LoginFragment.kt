@@ -8,6 +8,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
@@ -16,6 +19,7 @@ import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import ru.ll.coffeebonus.R
 import ru.ll.coffeebonus.databinding.FragmentLoginBinding
 import ru.ll.coffeebonus.ui.BaseFragment
@@ -42,12 +46,12 @@ class LoginFragment : BaseFragment<FragmentLoginBinding, LoginViewModel>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-//        viewLifecycleOwner.lifecycleScope.launch {
-//            viewModel.loginStateObservable
-//                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.loginStateObservable
+                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
 //                .filter { it }
-//                .collect { viewModel.onLoginSuccess() }
-//        }
+                .collect { Timber.d("Вывод $it из LoginFragment") }
+        }
         binding.buttonLogin.setOnClickListener {
             oneTapClient = Identity.getSignInClient(requireActivity())
             signInRequest = BeginSignInRequest.builder()
