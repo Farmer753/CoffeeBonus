@@ -37,6 +37,12 @@
         android:name="ru.ll.coffeebonus.ui.login.LoginFragment"
         android:label="Login"
         tools:layout="@layout/fragment_login">
+        <action
+            android:id="@+id/action_login_to_profile"
+            app:destination="@+id/profileFragment"
+            app:popUpTo="@id/profileFragment"
+            app:popUpToInclusive="true">
+        </action>
     </fragment>
 
     <dialog

@@ -11,6 +11,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
@@ -46,12 +47,12 @@ class LoginFragment : BaseFragment<FragmentLoginBinding, LoginViewModel>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.loginStateObservable
-                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
-//                .filter { it }
-                .collect { Timber.d("Вывод $it из LoginFragment") }
-        }
+//        viewLifecycleOwner.lifecycleScope.launch {
+//            viewModel.loginStateObservable
+//                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+////                .filter { it }
+//                .collect { Timber.d("Вывод $it из LoginFragment") }
+//        }
         binding.buttonLogin.setOnClickListener {
             oneTapClient = Identity.getSignInClient(requireActivity())
             signInRequest = BeginSignInRequest.builder()
@@ -110,6 +111,18 @@ class LoginFragment : BaseFragment<FragmentLoginBinding, LoginViewModel>() {
                             "Не удалось запустить авторизацию ${e.message}",
                             Toast.LENGTH_LONG
                         ).show()
+                    }
+                }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.eventsFlow
+                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .collect { event ->
+                    when (event) {
+                        is LoginViewModel.Event.NavigateToProfile -> {
+                            findNavController().navigate(R.id.action_login_to_profile)
+                        }
                     }
                 }
         }

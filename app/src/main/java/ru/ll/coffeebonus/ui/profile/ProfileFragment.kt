@@ -30,6 +30,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding, ProfileViewModel>()
         binding.buttonLogin.setOnClickListener {
             findNavController().navigate(R.id.action_profile_to_login)
         }
+        binding.buttonLogout.setOnClickListener { viewModel.logout() }
     }
 
 }
