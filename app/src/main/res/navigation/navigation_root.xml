@@ -30,6 +30,9 @@
                 android:name="ARG_COFFEESHOP"
                 app:argType="ru.ll.coffeebonus.domain.CoffeeShop" />
         </action>
+        <action
+            android:id="@+id/action_map_to_profile"
+            app:destination="@+id/profileFragment" />
     </fragment>
 
     <fragment
@@ -41,8 +44,7 @@
             android:id="@+id/action_login_to_profile"
             app:destination="@+id/profileFragment"
             app:popUpTo="@id/profileFragment"
-            app:popUpToInclusive="true">
-        </action>
+            app:popUpToInclusive="true" />
     </fragment>
 
     <dialog

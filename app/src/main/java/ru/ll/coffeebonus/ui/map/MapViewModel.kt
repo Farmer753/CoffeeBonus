@@ -20,6 +20,8 @@ class MapViewModel @Inject constructor(
         data class NavigateToCoffee(
             val coffeeShop: CoffeeShop
         ) : Event()
+
+        object NavigateToProfile : Event()
     }
 
     val coffeeShops = mutableMapOf<String, CoffeeShop>()
@@ -41,6 +43,12 @@ class MapViewModel @Inject constructor(
         }
         viewModelScope.launch {
             _searchResult.emit(coffeeShops.values.toList())
+        }
+    }
+
+    fun profileClick() {
+        viewModelScope.launch {
+            eventChannel.send(Event.NavigateToProfile)
         }
     }
 }

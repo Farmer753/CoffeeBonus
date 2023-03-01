@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -171,12 +172,6 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
     override val bindingInflater: (LayoutInflater, ViewGroup?, Boolean) -> FragmentMapBinding =
         FragmentMapBinding::inflate
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        MapKitFactory.initialize(requireContext())
-        SearchFactory.initialize(requireContext())
-    }
-
     val placeMarkTapListener: MapObjectTapListener = MapObjectTapListener { placeMark, point ->
         showMessage("Нажата")
         val zoom = max(COFFEE_SHOP_ZOOM_DEFAULT, binding.mapview.map.cameraPosition.zoom)
@@ -191,6 +186,12 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
             )
         }
         true
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        MapKitFactory.initialize(requireContext())
+        SearchFactory.initialize(requireContext())
     }
 
     override fun onViewCreated(view: android.view.View, savedInstanceState: Bundle?) {
@@ -226,6 +227,15 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         mapObjects =
             binding.mapview.map.mapObjects.addClusterizedPlacemarkCollection(clusterListener)
 
+        binding.toolbar.inflateMenu(R.menu.menu_profile)
+        binding.toolbar.setOnMenuItemClickListener { item: MenuItem ->
+            if (item.itemId == R.id.profile) {
+                Timber.d("Профиль нажат")
+                viewModel.profileClick()
+            }
+            false
+        }
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.eventsFlow
                 .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
@@ -243,6 +253,9 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                                 Timber.e(e, "Ошибка навигации")
                             }
                         }
+                        MapViewModel.Event.NavigateToProfile -> findNavController().navigate(
+                            R.id.action_map_to_profile
+                        )
                     }
                 }
         }

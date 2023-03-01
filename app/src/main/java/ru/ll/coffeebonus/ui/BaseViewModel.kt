@@ -14,4 +14,6 @@ abstract class BaseViewModel : ViewModel() {
         super.onCleared()
         Timber.d("onCleared ${javaClass.simpleName}")
     }
+
+
 }
