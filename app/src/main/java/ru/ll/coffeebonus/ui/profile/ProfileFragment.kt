@@ -23,7 +23,9 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding, ProfileViewModel>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.toolbar.setNavigationOnClickListener { Timber.d("Вывод из profileFragment") }
+        binding.toolbar.setNavigationOnClickListener {
+            findNavController().popBackStack()
+        }
         binding.buttonMap.setOnClickListener {
             findNavController().navigate(R.id.action_profile_to_map)
         }
