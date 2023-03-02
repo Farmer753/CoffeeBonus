@@ -10,12 +10,6 @@
         android:name="ru.ll.coffeebonus.ui.profile.ProfileFragment"
         android:label="Profile"
         tools:layout="@layout/fragment_profile">
-        <action
-            android:id="@+id/action_profile_to_map"
-            app:destination="@+id/mapFragment" />
-        <action
-            android:id="@+id/action_profile_to_login"
-            app:destination="@+id/loginFragment" />
     </fragment>
 
     <fragment
