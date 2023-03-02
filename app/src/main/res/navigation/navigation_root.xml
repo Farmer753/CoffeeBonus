@@ -10,12 +10,6 @@
         android:name="ru.ll.coffeebonus.ui.profile.ProfileFragment"
         android:label="Profile"
         tools:layout="@layout/fragment_profile">
-        <action
-            android:id="@+id/action_profile_to_map"
-            app:destination="@+id/mapFragment" />
-        <action
-            android:id="@+id/action_profile_to_login"
-            app:destination="@+id/loginFragment" />
     </fragment>
 
     <fragment
@@ -33,6 +27,9 @@
         <action
             android:id="@+id/action_map_to_profile"
             app:destination="@+id/profileFragment" />
+        <action
+            android:id="@+id/action_map_to_login"
+            app:destination="@+id/loginFragment" />
     </fragment>
 
     <fragment
@@ -43,7 +40,7 @@
         <action
             android:id="@+id/action_login_to_profile"
             app:destination="@+id/profileFragment"
-            app:popUpTo="@id/profileFragment"
+            app:popUpTo="@id/loginFragment"
             app:popUpToInclusive="true" />
     </fragment>
 

@@ -6,8 +6,10 @@ import ru.ll.coffeebonus.ui.BaseViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class ProfileViewModel @Inject constructor(val sessionRepository: SessionRepository) :
-    BaseViewModel() {
+class ProfileViewModel @Inject constructor(
+    val sessionRepository: SessionRepository
+) : BaseViewModel() {
+
     fun logout() {
         sessionRepository.logout()
     }
