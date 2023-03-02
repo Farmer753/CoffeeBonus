@@ -8,12 +8,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import ru.ll.coffeebonus.domain.CoffeeShop
+import ru.ll.coffeebonus.domain.SessionRepository
 import ru.ll.coffeebonus.ui.BaseViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
-    val test: String
+    val test: String,
+    val sessionRepository: SessionRepository
 ) : BaseViewModel() {
 
     sealed class Event {
@@ -22,6 +24,7 @@ class MapViewModel @Inject constructor(
         ) : Event()
 
         object NavigateToProfile : Event()
+        object NavigateToLogin : Event()
     }
 
     val coffeeShops = mutableMapOf<String, CoffeeShop>()
@@ -48,7 +51,11 @@ class MapViewModel @Inject constructor(
 
     fun profileClick() {
         viewModelScope.launch {
-            eventChannel.send(Event.NavigateToProfile)
+            if (sessionRepository.userLogined.value) {
+                eventChannel.send(Event.NavigateToProfile)
+            } else {
+                eventChannel.send(Event.NavigateToLogin)
+            }
         }
     }
 }

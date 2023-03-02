@@ -256,6 +256,9 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                         MapViewModel.Event.NavigateToProfile -> findNavController().navigate(
                             R.id.action_map_to_profile
                         )
+                        MapViewModel.Event.NavigateToLogin -> findNavController().navigate(
+                            R.id.action_map_to_login
+                        )
                     }
                 }
         }
