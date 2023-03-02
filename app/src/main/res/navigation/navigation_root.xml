@@ -46,7 +46,7 @@
         <action
             android:id="@+id/action_login_to_profile"
             app:destination="@+id/profileFragment"
-            app:popUpTo="@id/profileFragment"
+            app:popUpTo="@id/loginFragment"
             app:popUpToInclusive="true" />
     </fragment>
 
