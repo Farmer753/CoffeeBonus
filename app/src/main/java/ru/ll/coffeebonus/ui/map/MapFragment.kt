@@ -294,6 +294,9 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
     override fun onStop() {
         binding.mapview.onStop()
         MapKitFactory.getInstance().onStop()
+        Timber.d("onStop")
+        shownPlacemarks.clear()
+        mapObjects.clear()
         super.onStop()
     }
 
