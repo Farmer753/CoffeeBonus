@@ -149,6 +149,7 @@ class LoginFragment : BaseFragment<FragmentLoginBinding, LoginViewModel>() {
                     val credential = oneTapClient.getSignInCredentialFromIntent(data)
                     val idToken = credential.googleIdToken!!
                     Timber.d("пользователь ${credential.displayName}")
+                    viewModel.showProgress(true)
 //                    Initialize Firebase Auth
                     val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
                     auth.signInWithCredential(firebaseCredential)
@@ -157,8 +158,9 @@ class LoginFragment : BaseFragment<FragmentLoginBinding, LoginViewModel>() {
                                 // Sign in success, update UI with the signed-in user's information
                                 Timber.d("signInWithCredential:success")
                             } else {
-                                // If sign in fails, display a message to the user.
                                 Timber.w("signInWithCredential:failure", task.exception)
+                                viewModel.showProgress(false)
+                                // If sign in fails, display a message to the user.
                                 Toast.makeText(
                                     requireContext(),
                                     "Не удалось авторизоваться в firebase ${task.exception?.message}",

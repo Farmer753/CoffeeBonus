@@ -20,6 +20,7 @@ class LoginViewModel @Inject constructor(
     val userRepository: UserRepository
 ) : BaseViewModel() {
 
+
     sealed class Event {
         object NavigateToProfile : Event()
         data class ShowMessage(val message: String) : Event()
@@ -53,6 +54,12 @@ class LoginViewModel @Inject constructor(
                     _progress.emit(false)
                 }
             }
+        }
+    }
+
+    fun showProgress(visibility: Boolean) {
+        viewModelScope.launch {
+            _progress.emit(visibility)
         }
     }
 
