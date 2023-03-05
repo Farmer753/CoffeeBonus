@@ -5,6 +5,8 @@ import android.content.IntentSender
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.viewModels
@@ -49,13 +51,6 @@ class LoginFragment : BaseFragment<FragmentLoginBinding, LoginViewModel>() {
         binding.toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
         }
-
-//        viewLifecycleOwner.lifecycleScope.launch {
-//            viewModel.loginStateObservable
-//                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
-////                .filter { it }
-//                .collect { Timber.d("Вывод $it из LoginFragment") }
-//        }
         binding.buttonLogin.setOnClickListener {
             oneTapClient = Identity.getSignInClient(requireActivity())
             signInRequest = BeginSignInRequest.builder()
@@ -129,6 +124,17 @@ class LoginFragment : BaseFragment<FragmentLoginBinding, LoginViewModel>() {
                         is LoginViewModel.Event.ShowMessage -> {
                             showMessage(event.message)
                         }
+                    }
+                }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.progress
+                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .collect {
+                    if (it) {
+                        binding.progressView.visibility = VISIBLE
+                    } else {
+                        binding.progressView.visibility = GONE
                     }
                 }
         }
