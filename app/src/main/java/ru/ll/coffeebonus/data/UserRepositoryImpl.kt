@@ -15,7 +15,7 @@ class UserRepositoryImpl(
         const val COLLECTION_USERS = "users"
     }
 
-    override suspend fun saveUserCoroutines(firestoreUser: FirestoreUser) {
+    override suspend fun saveUser(firestoreUser: FirestoreUser) {
         bd.collection(COLLECTION_USERS).document(firestoreUser.id)
             .set(firestoreUser)
             .await()

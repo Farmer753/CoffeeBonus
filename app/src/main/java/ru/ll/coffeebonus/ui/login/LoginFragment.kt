@@ -126,6 +126,9 @@ class LoginFragment : BaseFragment<FragmentLoginBinding, LoginViewModel>() {
                         is LoginViewModel.Event.NavigateToProfile -> {
                             findNavController().navigate(R.id.action_login_to_profile)
                         }
+                        is LoginViewModel.Event.ShowMessage -> {
+                            showMessage(event.message)
+                        }
                     }
                 }
         }

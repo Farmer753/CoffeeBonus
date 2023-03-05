@@ -20,6 +20,7 @@ class LoginViewModel @Inject constructor(
 
     sealed class Event {
         object NavigateToProfile : Event()
+        data class ShowMessage(val message: String) : Event()
     }
 
     private val eventChannel = Channel<LoginViewModel.Event>(Channel.BUFFERED)
@@ -28,15 +29,23 @@ class LoginViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             sessionRepository.userLogined.filter { it }.collect {
-                Timber.d("Значение $it")
-//                eventChannel.send(LoginViewModel.Event.NavigateToProfile)
-//                TODO вернуть навигацию и переписать
-                val userExist = userRepository.userExist(userRepository.getAuthorizedUser().id)
-                Timber.d("Существование юзера $userExist")
-                userRepository.saveUserCoroutines(userRepository.getAuthorizedUser())
-                Timber.d("Юзер из Firestore ${userRepository.getFirestoreUser()}")
+                try {
+                    val userExist = userRepository.userExist(userRepository.getAuthorizedUser().id)
+//                    throw IllegalStateException("test error")
+                    if (!userExist) {
+                        userRepository.saveUser(userRepository.getAuthorizedUser())
+                    }
+                    eventChannel.send(LoginViewModel.Event.NavigateToProfile)
+                } catch (t: Throwable) {
+                    Timber.e(t, "ошибка firestore")
+                    eventChannel.send(
+                        LoginViewModel.Event.ShowMessage(
+                            t.message ?: "Unexpected error"
+                        )
+                    )
+                    sessionRepository.logout()
+                }
             }
-
         }
     }
 
