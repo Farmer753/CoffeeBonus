@@ -5,8 +5,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import ru.ll.coffeebonus.databinding.FragmentProfileBinding
 import ru.ll.coffeebonus.ui.BaseFragment
 
@@ -25,6 +29,17 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding, ProfileViewModel>()
             findNavController().popBackStack()
         }
         binding.buttonLogout.setOnClickListener { viewModel.logout() }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.eventsFlow
+                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .collect { event ->
+                    when (event) {
+                        is ProfileViewModel.Event.CloseScreen -> {
+                            findNavController().popBackStack()
+                        }
+                    }
+                }
+        }
     }
 
 }
