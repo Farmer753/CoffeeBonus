@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -16,13 +17,103 @@
         app:title="@string/profile"
         app:titleTextColor="@color/white" />
 
+    <ImageView
+        android:id="@+id/iconImageView"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"
+        tools:ignore="ContentDescription"
+        tools:src="@drawable/ic_baseline_person_24" />
+
+    <TextView
+        android:id="@+id/nameTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/iconImageView"
+        app:layout_constraintTop_toTopOf="@+id/iconImageView"
+        tools:text="Иванов Иван Иванович" />
+
+    <TextView
+        android:id="@+id/emailTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/iconImageView"
+        app:layout_constraintTop_toBottomOf="@+id/nameTextView"
+        tools:text="ivanov@mail.ru" />
+
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/buttonLogout"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Выйти"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+        android:layout_margin="16dp"
+        android:text="@string/logout"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/errorView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/whiteHalfTransparent"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@+id/buttonLogout"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar">
+
+        <TextView
+            android:id="@+id/errorTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="Текст ошибки"
+            android:gravity="center"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonRetry"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:text="@string/retry"
+            android:visibility="visible" />
+    </LinearLayout>
+
+
+    <FrameLayout
+        android:id="@+id/progressView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginBottom="16dp"
+        android:background="@color/whiteHalfTransparent"
+        android:clickable="true"
+        android:elevation="16dp"
+        android:focusable="true"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/buttonLogout"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar">
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
+    </FrameLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_margin="16dp"
+        android:background="@color/greyHalfTransparent"
+        android:gravity="center"
+        android:text="Тут будут кофейни"
+        app:layout_constraintTop_toBottomOf="@+id/emailTextView" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
