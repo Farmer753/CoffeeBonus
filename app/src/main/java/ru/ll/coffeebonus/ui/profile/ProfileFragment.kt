@@ -9,7 +9,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import coil.load
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import ru.ll.coffeebonus.databinding.FragmentProfileBinding
 import ru.ll.coffeebonus.ui.BaseFragment
@@ -29,6 +31,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding, ProfileViewModel>()
         binding.toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
         }
+        binding.buttonRetry.setOnClickListener { viewModel.loadUser() }
         binding.buttonLogout.setOnClickListener { viewModel.logout() }
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.eventsFlow
@@ -44,8 +47,12 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding, ProfileViewModel>()
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.userStateFlow
                 .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .filterNotNull()
                 .collect {
                     Timber.d("юзер $it")
+                    binding.nameTextView.text = it.name
+                    binding.emailTextView.text = it.email
+                    binding.iconImageView.load(it.avatarUrl)
                 }
         }
         viewLifecycleOwner.lifecycleScope.launch {
@@ -53,6 +60,11 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding, ProfileViewModel>()
                 .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
                 .collect {
                     Timber.d("прогресс $it")
+                    binding.progressView.visibility = if (it) {
+                        View.VISIBLE
+                    } else {
+                        View.GONE
+                    }
                 }
         }
         viewLifecycleOwner.lifecycleScope.launch {
@@ -60,6 +72,12 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding, ProfileViewModel>()
                 .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
                 .collect {
                     Timber.d("ошибка $it")
+                    binding.errorView.visibility = if (it != null) {
+                        View.VISIBLE
+                    } else {
+                        View.GONE
+                    }
+                    binding.errorTextView.text = it
                 }
         }
     }
