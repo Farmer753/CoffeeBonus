@@ -5,6 +5,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import ru.ll.coffeebonus.domain.CoffeeShop
@@ -29,7 +30,7 @@ class MapViewModel @Inject constructor(
 
     val coffeeShops = mutableMapOf<String, CoffeeShop>()
     private val _searchResult = MutableStateFlow<List<CoffeeShop>>(listOf())
-    val searchResult = _searchResult.asStateFlow()
+    val searchResult = _searchResult.asStateFlow().debounce(1000)
 
     private val eventChannel = Channel<Event>(Channel.BUFFERED)
     val eventsFlow = eventChannel.receiveAsFlow()
