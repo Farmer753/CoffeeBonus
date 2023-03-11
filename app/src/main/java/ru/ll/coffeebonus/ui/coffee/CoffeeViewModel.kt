@@ -7,6 +7,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import ru.ll.coffeebonus.domain.CoffeeShop
 import ru.ll.coffeebonus.ui.BaseViewModel
+import timber.log.Timber
 
 class CoffeeViewModel @AssistedInject constructor(
     @Assisted("coffeeShop") val coffeeShop: CoffeeShop
@@ -29,5 +30,9 @@ class CoffeeViewModel @AssistedInject constructor(
         fun create(
             @Assisted("coffeeShop") coffeeShop: CoffeeShop
         ): CoffeeViewModel
+    }
+
+    fun toggleFavorite() {
+        Timber.d("toggleFavorite")
     }
 }

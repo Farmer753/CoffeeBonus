@@ -40,21 +40,22 @@ class CoffeeFragment : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.name.text = "Название ${viewModel.coffeeShop.name}"
-        binding.address.text = "Адрес ${viewModel.coffeeShop.address}"
-        binding.map.setNoninteractive(true)
+        binding.nameTextView.text = "Название ${viewModel.coffeeShop.name}"
+        binding.addressTextView.text = "Адрес ${viewModel.coffeeShop.address}"
+        binding.mapView.setNoninteractive(true)
+        binding.favoriteImageView.setOnClickListener { viewModel.toggleFavorite() }
         val imageProvider = DrawableImageProvider(
             requireContext(),
             R.drawable.ic_action_name
         )
-        binding.map.map.mapObjects.addPlacemark(
+        binding.mapView.map.mapObjects.addPlacemark(
             Point(
                 viewModel.coffeeShop.latitude.toDouble(),
                 viewModel.coffeeShop.longitude.toDouble()
             ),
             imageProvider
         )
-        binding.map.map.move(
+        binding.mapView.map.move(
             CameraPosition(
                 Point(
                     viewModel.coffeeShop.latitude.toDouble(),
