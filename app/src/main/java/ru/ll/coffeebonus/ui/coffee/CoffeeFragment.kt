@@ -79,10 +79,7 @@ class CoffeeFragment : BottomSheetDialogFragment() {
                     when (event) {
                         is CoffeeViewModel.Event.ShowNeedAuthorisationMessage -> {
                             val snackbar = Snackbar.make(
-//                                dialog?.window?.decorView?:view,
-//                                parentFragment?.view ?: view,
-//                                binding.anchorView,
-                                view,
+                                binding.root.rootView,
                                 R.string.need_authorisation,
                                 Snackbar.LENGTH_LONG
                             )
