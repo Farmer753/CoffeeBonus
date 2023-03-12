@@ -30,6 +30,7 @@ import ru.ll.coffeebonus.databinding.FragmentMapBinding
 import ru.ll.coffeebonus.domain.CoffeeShop
 import ru.ll.coffeebonus.ui.BaseFragment
 import ru.ll.coffeebonus.ui.coffee.CoffeeFragment.Companion.ARG_COFFEESHOP
+import ru.ll.coffeebonus.ui.login.LoginFragment
 import ru.ll.coffeebonus.util.DrawableImageProvider
 import timber.log.Timber
 import java.lang.Float.max
@@ -245,7 +246,8 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                             try {
                                 Timber.d("event ${event.coffeeShop}")
                                 findNavController().navigate(
-                                    R.id.action_map_to_coffee, bundleOf(
+                                    R.id.action_map_to_coffee,
+                                    bundleOf(
                                         ARG_COFFEESHOP to event.coffeeShop
                                     )
                                 )
@@ -257,7 +259,8 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                             R.id.action_map_to_profile
                         )
                         MapViewModel.Event.NavigateToLogin -> findNavController().navigate(
-                            R.id.action_map_to_login
+                            R.id.action_map_to_login,
+                            bundleOf(LoginFragment.ARG_OPEN_PROFILE to true)
                         )
                     }
                 }

@@ -40,6 +40,7 @@ class CoffeeViewModel @AssistedInject constructor(
 
     sealed class Event {
         object ShowNeedAuthorisationMessage : Event()
+        object NavigationToLogin: Event()
     }
 
     private val eventChannel = Channel<CoffeeViewModel.Event>(Channel.BUFFERED)
@@ -53,6 +54,12 @@ class CoffeeViewModel @AssistedInject constructor(
             viewModelScope.launch {
                 eventChannel.send(Event.ShowNeedAuthorisationMessage)
             }
+        }
+    }
+
+    fun onLoginClick() {
+        viewModelScope.launch {
+            eventChannel.send(Event.NavigationToLogin)
         }
     }
 }

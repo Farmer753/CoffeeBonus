@@ -4,10 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.snackbar.Snackbar
 import com.yandex.mapkit.geometry.Point
@@ -17,6 +19,7 @@ import kotlinx.coroutines.launch
 import ru.ll.coffeebonus.R
 import ru.ll.coffeebonus.databinding.FragmentCoffeeBinding
 import ru.ll.coffeebonus.domain.CoffeeShop
+import ru.ll.coffeebonus.ui.login.LoginFragment.Companion.ARG_OPEN_PROFILE
 import ru.ll.coffeebonus.util.DrawableImageProvider
 import timber.log.Timber
 import javax.inject.Inject
@@ -84,7 +87,16 @@ class CoffeeFragment : BottomSheetDialogFragment() {
                                 Snackbar.LENGTH_LONG
                             )
                             snackbar.anchorView = binding.anchorView
+                            snackbar.setAction(R.string.login) { viewModel.onLoginClick() }
                             snackbar.show()
+
+                        }
+                        is CoffeeViewModel.Event.NavigationToLogin -> {
+                            findNavController().navigate(
+                                R.id.action_coffee_to_login,
+                                bundleOf(ARG_OPEN_PROFILE to false)
+
+                            )
                         }
                     }
                 }
