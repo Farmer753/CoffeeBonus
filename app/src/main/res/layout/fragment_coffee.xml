@@ -25,10 +25,10 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:padding="8dp"
+        android:src="@drawable/ic_baseline_favorite_24"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="ContentDescription"
-        android:src="@drawable/ic_baseline_favorite_24" />
+        tools:ignore="ContentDescription" />
 
     <TextView
         android:id="@+id/addressTextView"
@@ -50,7 +50,27 @@
         android:id="@+id/anchorView"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        app:layout_constraintTop_toBottomOf="@+id/mapView"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/mapView" />
+
+    <FrameLayout
+        android:id="@+id/progressView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/whiteHalfTransparent"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/favoriteImageView"
+        app:layout_constraintEnd_toEndOf="@id/favoriteImageView"
+        app:layout_constraintStart_toStartOf="@id/favoriteImageView"
+        app:layout_constraintTop_toTopOf="@id/favoriteImageView"
+        tools:visibility="visible">
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

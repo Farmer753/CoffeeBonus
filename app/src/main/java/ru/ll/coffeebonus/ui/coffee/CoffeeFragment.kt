@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -98,6 +99,18 @@ class CoffeeFragment : BottomSheetDialogFragment() {
 
                             )
                         }
+                        is CoffeeViewModel.Event.ShowMessage -> showMessage(event.message)
+                    }
+                }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.loadingStateFlow
+                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .collect {
+                    if (it) {
+                        binding.progressView.visibility = View.VISIBLE
+                    } else {
+                        binding.progressView.visibility = View.GONE
                     }
                 }
         }
@@ -110,5 +123,14 @@ class CoffeeFragment : BottomSheetDialogFragment() {
     ): View {
         _binding = bindingInflater(inflater, container, false)
         return binding.root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    private fun showMessage(message: String) {
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 }

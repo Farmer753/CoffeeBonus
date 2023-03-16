@@ -11,18 +11,20 @@
         android:label="Profile"
         tools:layout="@layout/fragment_profile"></fragment>
 
+    <action
+        android:id="@+id/action_map_to_coffee"
+        app:destination="@+id/coffeeDialogFragment">
+        <argument
+            android:name="ARG_COFFEESHOP"
+            app:argType="ru.ll.coffeebonus.domain.CoffeeShop" />
+    </action>
+
     <fragment
         android:id="@+id/mapFragment"
         android:name="ru.ll.coffeebonus.ui.map.MapFragment"
         android:label="Map"
         tools:layout="@layout/fragment_map">
-        <action
-            android:id="@+id/action_map_to_coffee"
-            app:destination="@+id/coffeeDialogFragment">
-            <argument
-                android:name="ARG_COFFEESHOP"
-                app:argType="ru.ll.coffeebonus.domain.CoffeeShop" />
-        </action>
+
         <action
             android:id="@+id/action_map_to_profile"
             app:destination="@+id/profileFragment" />
