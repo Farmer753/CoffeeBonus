@@ -62,8 +62,11 @@ class CoffeeViewModel @AssistedInject constructor(
             viewModelScope.launch {
                 try {
                     _loadingStateFlow.emit(true)
+                    val coffeeShopExist = coffeeShopRepository.exists(coffeeShop.id)
 //                    throw IllegalStateException("ошибка")
-                    coffeeShopRepository.save(converter.convert(coffeeShop))
+                    if (!coffeeShopExist) {
+                        coffeeShopRepository.save(converter.convert(coffeeShop))
+                    }
                     eventChannel.send(
                         Event.ShowMessage(
                             "Готово"

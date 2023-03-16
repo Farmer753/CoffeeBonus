@@ -30,7 +30,7 @@ class UserRepositoryImpl(
         )
     }
 
-    override suspend fun userExist(userId: String): Boolean {
+    override suspend fun userExists(userId: String): Boolean {
         return bd.collection(COLLECTION_USERS).document(userId).get().await().exists()
     }
 

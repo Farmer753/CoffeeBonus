@@ -61,7 +61,7 @@ class LoginViewModel @AssistedInject constructor(
             sessionRepository.userLogined.filter { it }.collect {
                 try {
                     _progress.emit(true)
-                    val userExist = userRepository.userExist(userRepository.getAuthorizedUser().id)
+                    val userExist = userRepository.userExists(userRepository.getAuthorizedUser().id)
                     if (!userExist) {
                         userRepository.saveUser(userRepository.getAuthorizedUser())
                     }

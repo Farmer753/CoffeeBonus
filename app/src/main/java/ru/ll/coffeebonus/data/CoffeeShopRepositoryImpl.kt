@@ -19,4 +19,8 @@ class CoffeeShopRepositoryImpl(
             .await()
     }
 
+    override suspend fun exists(id: String): Boolean {
+        return bd.collection(COLLECTION_COFFEE_SHOPS).whereEqualTo("id", id).get().await().isEmpty.not()
+    }
+
 }
