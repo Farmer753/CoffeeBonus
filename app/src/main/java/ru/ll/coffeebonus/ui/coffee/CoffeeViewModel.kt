@@ -11,12 +11,16 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import ru.ll.coffeebonus.domain.CoffeeShop
 import ru.ll.coffeebonus.domain.SessionRepository
+import ru.ll.coffeebonus.domain.coffeeshop.CoffeeShopRepository
+import ru.ll.coffeebonus.domain.coffeeshop.ModelConverter
 import ru.ll.coffeebonus.ui.BaseViewModel
 import timber.log.Timber
 
 class CoffeeViewModel @AssistedInject constructor(
     @Assisted("coffeeShop") val coffeeShop: CoffeeShop,
-    val sessionRepository: SessionRepository
+    val sessionRepository: SessionRepository,
+    val coffeeShopRepository: CoffeeShopRepository,
+    val converter: ModelConverter
 ) : BaseViewModel() {
 
     @Suppress("UNCHECKED_CAST")
@@ -40,7 +44,7 @@ class CoffeeViewModel @AssistedInject constructor(
 
     sealed class Event {
         object ShowNeedAuthorisationMessage : Event()
-        object NavigationToLogin: Event()
+        object NavigationToLogin : Event()
     }
 
     private val eventChannel = Channel<CoffeeViewModel.Event>(Channel.BUFFERED)
@@ -49,7 +53,13 @@ class CoffeeViewModel @AssistedInject constructor(
     fun toggleFavorite() {
         Timber.d("toggleFavorite")
         if (sessionRepository.userLogined.value) {
-//            TODO
+            viewModelScope.launch {
+                try {
+                    coffeeShopRepository.save(converter.convert(coffeeShop))
+                } catch (t: Throwable) {
+                    Timber.e(t, "ошибка сохранения кофейни в firestore")
+                }
+            }
         } else {
             viewModelScope.launch {
                 eventChannel.send(Event.ShowNeedAuthorisationMessage)
