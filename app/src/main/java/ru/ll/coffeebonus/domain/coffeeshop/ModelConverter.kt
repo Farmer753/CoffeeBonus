@@ -6,6 +6,7 @@ class ModelConverter {
 
     fun convert(model: FirestoreCoffeeShop): CoffeeShop {
         return CoffeeShop(
+            firestoreId = model.firestoreId,
             id = model.id,
             name = model.name,
             address = model.address,
@@ -16,6 +17,7 @@ class ModelConverter {
 
     fun convert(model: CoffeeShop): FirestoreCoffeeShop {
         return FirestoreCoffeeShop(
+            firestoreId = model.firestoreId ?: "",
             id = model.id,
             name = model.name,
             address = model.address,

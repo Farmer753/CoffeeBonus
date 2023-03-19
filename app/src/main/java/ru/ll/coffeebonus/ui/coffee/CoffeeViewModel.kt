@@ -15,6 +15,7 @@ import ru.ll.coffeebonus.domain.CoffeeShop
 import ru.ll.coffeebonus.domain.SessionRepository
 import ru.ll.coffeebonus.domain.coffeeshop.CoffeeShopRepository
 import ru.ll.coffeebonus.domain.coffeeshop.ModelConverter
+import ru.ll.coffeebonus.domain.user.UserRepository
 import ru.ll.coffeebonus.ui.BaseViewModel
 import timber.log.Timber
 
@@ -22,6 +23,7 @@ class CoffeeViewModel @AssistedInject constructor(
     @Assisted("coffeeShop") val coffeeShop: CoffeeShop,
     val sessionRepository: SessionRepository,
     val coffeeShopRepository: CoffeeShopRepository,
+    val userRepository: UserRepository,
     val converter: ModelConverter
 ) : BaseViewModel() {
 
@@ -66,6 +68,15 @@ class CoffeeViewModel @AssistedInject constructor(
 //                    throw IllegalStateException("ошибка")
                     if (!coffeeShopExist) {
                         coffeeShopRepository.save(converter.convert(coffeeShop))
+                    }
+                    val firestoreCoffeeShop = coffeeShopRepository.getByYandexId(coffeeShop.id)
+                    val coffeeShopFavoriteExist =
+                        userRepository.coffeeShopFavoriteExists(firestoreCoffeeShop.firestoreId)
+                    Timber.d("coffeeShopFavoriteExist $coffeeShopFavoriteExist")
+                    if (coffeeShopFavoriteExist) {
+                        userRepository.addCoffeeFavorite(firestoreCoffeeShop.firestoreId)
+                    } else {
+                        userRepository.removeCoffeeFavorite(firestoreCoffeeShop.firestoreId)
                     }
                     eventChannel.send(
                         Event.ShowMessage(

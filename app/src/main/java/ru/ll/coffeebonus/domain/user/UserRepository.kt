@@ -5,4 +5,7 @@ interface UserRepository {
     fun getAuthorizedUser(): FirestoreUser
     suspend fun userExists(userId: String):Boolean
     suspend fun getFirestoreUser(): FirestoreUser
+    suspend fun coffeeShopFavoriteExists(firestoreId: String): Boolean
+    suspend fun addCoffeeFavorite(firestoreId: String)
+    suspend fun removeCoffeeFavorite(firestoreId: String)
 }
