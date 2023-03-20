@@ -243,17 +243,13 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                 .collect { event ->
                     when (event) {
                         is MapViewModel.Event.NavigateToCoffee -> {
-                            try {
-                                Timber.d("event ${event.coffeeShop}")
-                                findNavController().navigate(
-                                    R.id.action_map_to_coffee,
-                                    bundleOf(
-                                        ARG_COFFEESHOP to event.coffeeShop
-                                    )
+                            Timber.d("event ${event.coffeeShop}")
+                            findNavController().navigate(
+                                R.id.action_map_to_coffee,
+                                bundleOf(
+                                    ARG_COFFEESHOP to event.coffeeShop
                                 )
-                            } catch (e: Throwable) {
-                                Timber.e(e, "Ошибка навигации")
-                            }
+                            )
                         }
                         MapViewModel.Event.NavigateToProfile -> findNavController().navigate(
                             R.id.action_map_to_profile

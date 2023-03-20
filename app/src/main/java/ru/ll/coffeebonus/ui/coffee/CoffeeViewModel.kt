@@ -7,6 +7,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -55,15 +56,26 @@ class CoffeeViewModel @AssistedInject constructor(
     private val eventChannel = Channel<Event>(Channel.BUFFERED)
     val eventsFlow = eventChannel.receiveAsFlow()
 
-    private val _loadingStateFlow = MutableStateFlow(false)
+    private val _loadingFavoriteStateFlow = MutableStateFlow(false)
+    val loadingFavoriteStateFlow = _loadingFavoriteStateFlow.asStateFlow()
+
+    private val _loadingStateFlow = MutableStateFlow<Boolean>(false)
     val loadingStateFlow = _loadingStateFlow.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            _loadingStateFlow.emit(true)
+            delay(1000)
+            _loadingStateFlow.emit(false)
+        }
+    }
 
     fun toggleFavorite() {
         Timber.d("toggleFavorite")
         if (sessionRepository.userLogined.value) {
             viewModelScope.launch {
                 try {
-                    _loadingStateFlow.emit(true)
+                    _loadingFavoriteStateFlow.emit(true)
                     val coffeeShopExist = coffeeShopRepository.exists(coffeeShop.id)
 //                    throw IllegalStateException("ошибка")
                     if (!coffeeShopExist) {
@@ -87,7 +99,7 @@ class CoffeeViewModel @AssistedInject constructor(
                         )
                     )
                 } finally {
-                    _loadingStateFlow.emit(false)
+                    _loadingFavoriteStateFlow.emit(false)
                 }
             }
         } else {

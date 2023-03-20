@@ -4,14 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.snackbar.Snackbar
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.CameraPosition
@@ -20,28 +18,26 @@ import kotlinx.coroutines.launch
 import ru.ll.coffeebonus.R
 import ru.ll.coffeebonus.databinding.FragmentCoffeeBinding
 import ru.ll.coffeebonus.domain.CoffeeShop
+import ru.ll.coffeebonus.ui.BaseFragment
 import ru.ll.coffeebonus.ui.login.LoginFragment.Companion.ARG_OPEN_PROFILE
 import ru.ll.coffeebonus.util.DrawableImageProvider
 import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class CoffeeFragment : BottomSheetDialogFragment() {
+class CoffeeFragment : BaseFragment<FragmentCoffeeBinding, CoffeeViewModel>() {
 
     companion object {
         const val ARG_COFFEESHOP = "ARG_COFFEESHOP"
     }
 
-    private var _binding: FragmentCoffeeBinding? = null
-    protected val binding get() = _binding!!
-
-    val bindingInflater: (LayoutInflater, ViewGroup?, Boolean) -> FragmentCoffeeBinding =
+    override val bindingInflater: (LayoutInflater, ViewGroup?, Boolean) -> FragmentCoffeeBinding =
         FragmentCoffeeBinding::inflate
 
     @Inject
     lateinit var viewModelAssistedFactory: CoffeeViewModel.Factory
 
-    private val viewModel: CoffeeViewModel by viewModels {
+    override val viewModel: CoffeeViewModel by viewModels {
         CoffeeViewModel.provideFactory(
             viewModelAssistedFactory,
             requireArguments().getSerializable(ARG_COFFEESHOP) as CoffeeShop
@@ -104,6 +100,17 @@ class CoffeeFragment : BottomSheetDialogFragment() {
                 }
         }
         viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.loadingFavoriteStateFlow
+                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .collect {
+                    if (it) {
+                        binding.progressFavoritesView.visibility = View.VISIBLE
+                    } else {
+                        binding.progressFavoritesView.visibility = View.GONE
+                    }
+                }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
             viewModel.loadingStateFlow
                 .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
                 .collect {
@@ -116,21 +123,4 @@ class CoffeeFragment : BottomSheetDialogFragment() {
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = bindingInflater(inflater, container, false)
-        return binding.root
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
-
-    private fun showMessage(message: String) {
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-    }
 }

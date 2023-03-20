@@ -54,7 +54,7 @@
         app:layout_constraintTop_toBottomOf="@+id/mapView" />
 
     <FrameLayout
-        android:id="@+id/progressView"
+        android:id="@+id/progressFavoritesView"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="@color/whiteHalfTransparent"
@@ -65,6 +65,22 @@
         app:layout_constraintEnd_toEndOf="@id/favoriteImageView"
         app:layout_constraintStart_toStartOf="@id/favoriteImageView"
         app:layout_constraintTop_toTopOf="@id/favoriteImageView"
+        tools:visibility="visible">
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/progressView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/whiteHalfTransparent"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone"
         tools:visibility="visible">
 
         <ProgressBar

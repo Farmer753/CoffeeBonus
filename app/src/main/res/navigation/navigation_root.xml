@@ -9,15 +9,8 @@
         android:id="@+id/profileFragment"
         android:name="ru.ll.coffeebonus.ui.profile.ProfileFragment"
         android:label="Profile"
-        tools:layout="@layout/fragment_profile"></fragment>
+        tools:layout="@layout/fragment_profile" />
 
-    <action
-        android:id="@+id/action_map_to_coffee"
-        app:destination="@+id/coffeeDialogFragment">
-        <argument
-            android:name="ARG_COFFEESHOP"
-            app:argType="ru.ll.coffeebonus.domain.CoffeeShop" />
-    </action>
 
     <fragment
         android:id="@+id/mapFragment"
@@ -34,6 +27,13 @@
             <argument
                 android:name="ARG_OPEN_PROFILE"
                 app:argType="boolean" />
+        </action>
+        <action
+            android:id="@+id/action_map_to_coffee"
+            app:destination="@+id/coffeeDialogFragment">
+            <argument
+                android:name="ARG_COFFEESHOP"
+                app:argType="ru.ll.coffeebonus.domain.CoffeeShop" />
         </action>
     </fragment>
 
@@ -52,7 +52,7 @@
             app:popUpToInclusive="true" />
     </fragment>
 
-    <dialog
+    <fragment
         android:id="@+id/coffeeDialogFragment"
         android:name="ru.ll.coffeebonus.ui.coffee.CoffeeFragment"
         android:label="Coffee"
@@ -67,5 +67,6 @@
                 android:name="ARG_OPEN_PROFILE"
                 app:argType="boolean" />
         </action>
-    </dialog>
+    </fragment>
+
 </navigation>
