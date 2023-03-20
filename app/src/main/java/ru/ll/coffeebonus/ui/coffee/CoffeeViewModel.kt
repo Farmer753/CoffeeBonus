@@ -73,16 +73,12 @@ class CoffeeViewModel @AssistedInject constructor(
                     val coffeeShopFavoriteExist =
                         userRepository.coffeeShopFavoriteExists(firestoreCoffeeShop.firestoreId)
                     Timber.d("coffeeShopFavoriteExist $coffeeShopFavoriteExist")
-                    if (coffeeShopFavoriteExist) {
+                    if (!coffeeShopFavoriteExist) {
                         userRepository.addCoffeeFavorite(firestoreCoffeeShop.firestoreId)
                     } else {
                         userRepository.removeCoffeeFavorite(firestoreCoffeeShop.firestoreId)
                     }
-                    eventChannel.send(
-                        Event.ShowMessage(
-                            "Готово"
-                        )
-                    )
+                    eventChannel.send(Event.ShowMessage("Готово"))
                 } catch (t: Throwable) {
                     Timber.e(t, "ошибка сохранения кофейни в firestore")
                     eventChannel.send(

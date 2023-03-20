@@ -1,10 +1,12 @@
 package ru.ll.coffeebonus.data
 
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import ru.ll.coffeebonus.domain.user.FirestoreUser
 import ru.ll.coffeebonus.domain.user.UserRepository
+import timber.log.Timber
 
 class UserRepositoryImpl(
     private val firebaseAuth: FirebaseAuth,
@@ -49,11 +51,16 @@ class UserRepositoryImpl(
             .get().await().isEmpty.not()
     }
 
-    override suspend fun addCoffeeFavorite(firestoreId: String) {
-        TODO("Not yet implemented")
+    override suspend fun addCoffeeFavorite(coffeeShopFirestoreId: String) {
+        Timber.d("coffeeShopFirestoreId $coffeeShopFirestoreId")
+        bd.collection(COLLECTION_USERS).document(getAuthorizedUser().id)
+            .update(FIELD_FAVORITE_COFFEE_SHOP, FieldValue.arrayUnion(coffeeShopFirestoreId))
+            .await()
     }
 
-    override suspend fun removeCoffeeFavorite(firestoreId: String) {
-        TODO("Not yet implemented")
+    override suspend fun removeCoffeeFavorite(coffeeShopFirestoreId: String) {
+        bd.collection(COLLECTION_USERS).document(getAuthorizedUser().id)
+            .update(FIELD_FAVORITE_COFFEE_SHOP, FieldValue.arrayRemove(coffeeShopFirestoreId))
+            .await()
     }
 }
