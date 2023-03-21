@@ -31,9 +31,9 @@ class CoffeeShopRepositoryImpl(
             .get().await().toObject(FirestoreCoffeeShop::class.java)!!
     }
 
-    override suspend fun getByYandexId(yandexId: String): FirestoreCoffeeShop {
+    override suspend fun getByYandexId(yandexId: String): FirestoreCoffeeShop? {
         return bd.collection(COLLECTION_COFFEE_SHOPS).whereEqualTo(FIELD_YANDEX_ID, yandexId)
-            .get().await().first().toObject(FirestoreCoffeeShop::class.java)
+            .get().await().firstOrNull()?.toObject(FirestoreCoffeeShop::class.java)
     }
 
 }

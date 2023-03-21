@@ -121,6 +121,18 @@ class CoffeeFragment : BaseFragment<FragmentCoffeeBinding, CoffeeViewModel>() {
                     }
                 }
         }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.favoriteCoffeeShopStateFlow
+                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .collect {
+                    if (it) {
+                        Timber.d("кофейня в избранном")
+                    } else {
+                        Timber.d("кофейня не в избранном")
+                    }
+                }
+        }
     }
 
 }

@@ -7,7 +7,6 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -15,6 +14,7 @@ import kotlinx.coroutines.launch
 import ru.ll.coffeebonus.domain.CoffeeShop
 import ru.ll.coffeebonus.domain.SessionRepository
 import ru.ll.coffeebonus.domain.coffeeshop.CoffeeShopRepository
+import ru.ll.coffeebonus.domain.coffeeshop.FirestoreCoffeeShop
 import ru.ll.coffeebonus.domain.coffeeshop.ModelConverter
 import ru.ll.coffeebonus.domain.user.UserRepository
 import ru.ll.coffeebonus.ui.BaseViewModel
@@ -62,12 +62,17 @@ class CoffeeViewModel @AssistedInject constructor(
     private val _loadingStateFlow = MutableStateFlow<Boolean>(false)
     val loadingStateFlow = _loadingStateFlow.asStateFlow()
 
+    private val _errorStateFlow = MutableStateFlow<String?>(null)
+    val errorStateFlow = _errorStateFlow.asStateFlow()
+
+    private val _favoriteCoffeeShopStateFlow = MutableStateFlow<Boolean>(false)
+    val favoriteCoffeeShopStateFlow = _favoriteCoffeeShopStateFlow.asStateFlow()
+
+    private val _firestoreCoffeeShopStateFlow = MutableStateFlow<FirestoreCoffeeShop?>(null)
+    val firestoreCoffeeShopStateFlow = _firestoreCoffeeShopStateFlow.asStateFlow()
+
     init {
-        viewModelScope.launch {
-            _loadingStateFlow.emit(true)
-            delay(1000)
-            _loadingStateFlow.emit(false)
-        }
+        loadCoffeeShop()
     }
 
     fun toggleFavorite() {
@@ -81,14 +86,16 @@ class CoffeeViewModel @AssistedInject constructor(
                     if (!coffeeShopExist) {
                         coffeeShopRepository.save(converter.convert(coffeeShop))
                     }
-                    val firestoreCoffeeShop = coffeeShopRepository.getByYandexId(coffeeShop.id)
+                    val firestoreCoffeeShop = coffeeShopRepository.getByYandexId(coffeeShop.id)!!
                     val coffeeShopFavoriteExist =
                         userRepository.coffeeShopFavoriteExists(firestoreCoffeeShop.firestoreId)
                     Timber.d("coffeeShopFavoriteExist $coffeeShopFavoriteExist")
                     if (!coffeeShopFavoriteExist) {
                         userRepository.addCoffeeFavorite(firestoreCoffeeShop.firestoreId)
+                        _favoriteCoffeeShopStateFlow.emit(true)
                     } else {
                         userRepository.removeCoffeeFavorite(firestoreCoffeeShop.firestoreId)
+                        _favoriteCoffeeShopStateFlow.emit(false)
                     }
                     eventChannel.send(Event.ShowMessage("Готово"))
                 } catch (t: Throwable) {
@@ -114,4 +121,32 @@ class CoffeeViewModel @AssistedInject constructor(
             eventChannel.send(Event.NavigationToLogin)
         }
     }
+
+    fun loadCoffeeShop() {
+        viewModelScope.launch {
+            try {
+                _loadingStateFlow.emit(true)
+                val coffeeShopFirestore = coffeeShopRepository.getByYandexId(coffeeShop.id)
+                _firestoreCoffeeShopStateFlow.emit(coffeeShopFirestore)
+                if (coffeeShopFirestore != null && sessionRepository.userLogined.value) {
+                    val coffeeShopFavoriteExist =
+                        userRepository.coffeeShopFavoriteExists(coffeeShopFirestore.firestoreId)
+                    _favoriteCoffeeShopStateFlow.emit(coffeeShopFavoriteExist)
+                }
+            } catch (t: Throwable) {
+                Timber.e(t, "ошибка получения кофейни в firestore")
+                _errorStateFlow.emit(t.message ?: "Неизвестная ошибка")
+            } finally {
+                _loadingStateFlow.emit(false)
+            }
+
+        }
+
+    }
+    // начинаем эмитить прогресс +
+    // метод, который будет получать кофейню из firestore +
+    // если кофейня есть, нужно узнать, является ли она для юзера избранной +
+    // в конце эмитим stateflow firestore и избранности кофейни +
+    // в слечае ошибки эмитим ошибку +
+    // в любом случае эмитим окончание прогресса+
 }
