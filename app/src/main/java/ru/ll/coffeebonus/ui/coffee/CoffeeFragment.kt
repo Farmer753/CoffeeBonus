@@ -128,11 +128,15 @@ class CoffeeFragment : BaseFragment<FragmentCoffeeBinding, CoffeeViewModel>() {
                 .collect {
                     if (it) {
                         Timber.d("кофейня в избранном")
+                        binding.favoriteImageView.setImageResource(R.drawable.ic_baseline_favorite_24)
                     } else {
                         Timber.d("кофейня не в избранном")
+                        binding.favoriteImageView.setImageResource(R.drawable.ic_baseline_favorite_border_24)
                     }
                 }
         }
+        //                        TODO подписка на ошибку
+        //                        TODO подписка на ашкуыещку кофейню
     }
 
 }
