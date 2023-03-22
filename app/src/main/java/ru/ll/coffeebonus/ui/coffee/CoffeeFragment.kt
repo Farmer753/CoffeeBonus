@@ -50,6 +50,8 @@ class CoffeeFragment : BaseFragment<FragmentCoffeeBinding, CoffeeViewModel>() {
         binding.addressTextView.text = "Адрес ${viewModel.coffeeShop.address}"
         binding.mapView.setNoninteractive(true)
         binding.favoriteImageView.setOnClickListener { viewModel.toggleFavorite() }
+        binding.buttonRetry.setOnClickListener { viewModel.loadCoffeeShop() }
+        binding.closeImageView.setOnClickListener { viewModel.onCloseClick() }
         val imageProvider = DrawableImageProvider(
             requireContext(),
             R.drawable.ic_action_name
@@ -96,6 +98,9 @@ class CoffeeFragment : BaseFragment<FragmentCoffeeBinding, CoffeeViewModel>() {
                             )
                         }
                         is CoffeeViewModel.Event.ShowMessage -> showMessage(event.message)
+                        is CoffeeViewModel.Event.CloseScreen -> {
+                            findNavController().popBackStack()
+                        }
                     }
                 }
         }
@@ -133,6 +138,19 @@ class CoffeeFragment : BaseFragment<FragmentCoffeeBinding, CoffeeViewModel>() {
                         Timber.d("кофейня не в избранном")
                         binding.favoriteImageView.setImageResource(R.drawable.ic_baseline_favorite_border_24)
                     }
+                }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.errorStateFlow
+                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .collect {
+                    Timber.d("ошибка $it")
+                    binding.errorView.visibility = if (it != null) {
+                        View.VISIBLE
+                    } else {
+                        View.GONE
+                    }
+                    binding.errorTextView.text = it
                 }
         }
         //                        TODO подписка на ошибку

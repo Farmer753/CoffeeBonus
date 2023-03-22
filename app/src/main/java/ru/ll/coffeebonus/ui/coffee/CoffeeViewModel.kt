@@ -51,6 +51,7 @@ class CoffeeViewModel @AssistedInject constructor(
         object ShowNeedAuthorisationMessage : Event()
         data class ShowMessage(val message: String) : Event()
         object NavigationToLogin : Event()
+        object CloseScreen: Event()
     }
 
     private val eventChannel = Channel<Event>(Channel.BUFFERED)
@@ -126,6 +127,10 @@ class CoffeeViewModel @AssistedInject constructor(
         viewModelScope.launch {
             try {
                 _loadingStateFlow.emit(true)
+                _errorStateFlow.emit(null)
+//                if (Random.nextBoolean()){
+//                    throw IllegalStateException("рандомная ошибка")
+//                }
                 val coffeeShopFirestore = coffeeShopRepository.getByYandexId(coffeeShop.id)
                 _firestoreCoffeeShopStateFlow.emit(coffeeShopFirestore)
                 if (coffeeShopFirestore != null && sessionRepository.userLogined.value) {
@@ -142,6 +147,12 @@ class CoffeeViewModel @AssistedInject constructor(
 
         }
 
+    }
+
+    fun onCloseClick() {
+        viewModelScope.launch {
+            eventChannel.send(Event.CloseScreen)
+        }
     }
     // начинаем эмитить прогресс +
     // метод, который будет получать кофейню из firestore +
