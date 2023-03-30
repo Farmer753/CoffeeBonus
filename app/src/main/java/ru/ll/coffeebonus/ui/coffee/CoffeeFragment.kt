@@ -126,7 +126,6 @@ class CoffeeFragment : BaseFragment<FragmentCoffeeBinding, CoffeeViewModel>() {
                     }
                 }
         }
-
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.favoriteCoffeeShopStateFlow
                 .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
@@ -153,8 +152,14 @@ class CoffeeFragment : BaseFragment<FragmentCoffeeBinding, CoffeeViewModel>() {
                     binding.errorTextView.text = it
                 }
         }
-        //                        TODO подписка на ошибку
-        //                        TODO подписка на ашкуыещку кофейню
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.firestoreCoffeeShopStateFlow
+                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .collect {
+                    Timber.d("firestoreCoffeeShopStateFlow $it")
+
+                }
+        }
     }
 
 }
