@@ -60,13 +60,6 @@
         app:layout_constraintTop_toBottomOf="@+id/addressTextView"
         tools:background="#80333333" />
 
-    <View
-        android:id="@+id/anchorView"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/mapView" />
-
     <FrameLayout
         android:id="@+id/progressFavoritesView"
         android:layout_width="0dp"

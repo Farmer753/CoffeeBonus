@@ -81,11 +81,10 @@ class CoffeeFragment : BaseFragment<FragmentCoffeeBinding, CoffeeViewModel>() {
                     when (event) {
                         is CoffeeViewModel.Event.ShowNeedAuthorisationMessage -> {
                             val snackbar = Snackbar.make(
-                                binding.root.rootView,
+                                binding.root,
                                 R.string.need_authorisation,
                                 Snackbar.LENGTH_LONG
                             )
-                            snackbar.anchorView = binding.anchorView
                             snackbar.setAction(R.string.login) { viewModel.onLoginClick() }
                             snackbar.show()
 
