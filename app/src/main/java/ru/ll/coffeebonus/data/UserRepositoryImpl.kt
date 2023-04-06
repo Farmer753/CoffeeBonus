@@ -63,4 +63,18 @@ class UserRepositoryImpl(
             .update(FIELD_FAVORITE_COFFEE_SHOP, FieldValue.arrayRemove(coffeeShopFirestoreId))
             .await()
     }
+
+    override suspend fun getFavoriteCoffeeShops(count: Short): List<String> {
+        if (count > 10) {
+            throw IllegalArgumentException("count не может быть больше 10")
+        }
+        return bd.collection(COLLECTION_USERS)
+            .document(getAuthorizedUser().id)
+            .collection(FIELD_FAVORITE_COFFEE_SHOP)
+//                TODO не работает!
+//            .limit(count.toLong())
+            .get()
+            .await()
+            .toObjects(String::class.java)
+    }
 }

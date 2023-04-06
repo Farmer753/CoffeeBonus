@@ -38,6 +38,10 @@ class ProfileViewModel @Inject constructor(
 
     init {
         loadUser()
+        viewModelScope.launch {
+            val count = userRepository.getFavoriteCoffeeShops(8)
+            Timber.d("count $count")
+        }
     }
 
     fun loadUser() {
