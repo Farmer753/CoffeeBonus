@@ -36,4 +36,12 @@ class CoffeeShopRepositoryImpl(
             .get().await().firstOrNull()?.toObject(FirestoreCoffeeShop::class.java)
     }
 
+    override suspend fun getCoffeeShopsByIds(listId: List<String>): List<FirestoreCoffeeShop> {
+        if (listId.size > 10) {
+            throw IllegalArgumentException("Список id кофеен не может быть больше 10")
+        }
+        return bd.collection(COLLECTION_COFFEE_SHOPS).whereIn(FIELD_FIRESTORE_ID, listId)
+            .get().await().toObjects(FirestoreCoffeeShop::class.java)
+    }
+
 }

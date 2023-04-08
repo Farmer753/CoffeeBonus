@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import ru.ll.coffeebonus.domain.SessionRepository
+import ru.ll.coffeebonus.domain.coffeeshop.CoffeeShopRepository
 import ru.ll.coffeebonus.domain.user.FirestoreUser
 import ru.ll.coffeebonus.domain.user.UserRepository
 import ru.ll.coffeebonus.ui.BaseViewModel
@@ -17,7 +18,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     val sessionRepository: SessionRepository,
-    val userRepository: UserRepository
+    val userRepository: UserRepository,
+    val coffeeShopRepository: CoffeeShopRepository
 ) : BaseViewModel() {
 
     sealed class Event {
@@ -39,8 +41,15 @@ class ProfileViewModel @Inject constructor(
     init {
         loadUser()
         viewModelScope.launch {
-            val count = userRepository.getFavoriteCoffeeShops(8)
-            Timber.d("count $count")
+            try {
+                val favoriteCoffeeShopIds = userRepository.getFirestoreUser().favoriteCoffeeShop.take(10)
+                Timber.d("favoriteCoffeeShopIds $favoriteCoffeeShopIds")
+                val favoriteCoffeeShops =
+                    coffeeShopRepository.getCoffeeShopsByIds(favoriteCoffeeShopIds)
+                Timber.d("favoriteCoffeeShops $favoriteCoffeeShops")
+            } catch (t: Throwable) {
+                Timber.e(t, "ошибка получения списка избранных кофеен")
+            }
         }
     }
 
