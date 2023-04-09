@@ -8,5 +8,4 @@ interface UserRepository {
     suspend fun coffeeShopFavoriteExists(firestoreId: String): Boolean
     suspend fun addCoffeeFavorite(firestoreId: String)
     suspend fun removeCoffeeFavorite(firestoreId: String)
-    suspend fun getFavoriteCoffeeShops(count: Short): List<String>
 }

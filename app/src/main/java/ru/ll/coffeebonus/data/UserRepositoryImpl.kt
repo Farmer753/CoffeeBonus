@@ -63,25 +63,4 @@ class UserRepositoryImpl(
             .update(FIELD_FAVORITE_COFFEE_SHOP, FieldValue.arrayRemove(coffeeShopFirestoreId))
             .await()
     }
-
-    override suspend fun getFavoriteCoffeeShops(count: Short): List<String> {
-        if (count > 10) {
-            throw IllegalArgumentException("count не может быть больше 10")
-        }
-        Timber.d("getAuthorizedUser().id ${getAuthorizedUser().id}")
-        return bd.collection(
-            COLLECTION_USERS + "/" + getAuthorizedUser().id +
-                    "/" + FIELD_FAVORITE_COFFEE_SHOP
-        )
-//            .whereEqualTo(FIELD_ID, getAuthorizedUser().id)
-//            .document(getAuthorizedUser().id + "/" + FIELD_FAVORITE_COFFEE_SHOP)
-//            .document(getAuthorizedUser().id)
-
-//            .collection(FIELD_FAVORITE_COFFEE_SHOP)
-//                TODO не работает!
-//            .limit(count.toLong())
-            .get()
-            .await()
-            .toObjects(String::class.java)
-    }
 }
