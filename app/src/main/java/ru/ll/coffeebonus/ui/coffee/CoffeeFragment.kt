@@ -1,5 +1,6 @@
 package ru.ll.coffeebonus.ui.coffee
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -44,34 +45,16 @@ class CoffeeFragment : BaseFragment<FragmentCoffeeBinding, CoffeeViewModel>() {
         )
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.nameTextView.text = "Название ${viewModel.coffeeShop.name}"
         binding.addressTextView.text = "Адрес ${viewModel.coffeeShop.address}"
-        binding.mapView.setNoninteractive(true)
         binding.favoriteImageView.setOnClickListener { viewModel.toggleFavorite() }
         binding.buttonRetry.setOnClickListener { viewModel.loadCoffeeShop() }
         binding.closeImageView.setOnClickListener { viewModel.onCloseClick() }
-        val imageProvider = DrawableImageProvider(
-            requireContext(),
-            R.drawable.ic_action_name
-        )
-        binding.mapView.map.mapObjects.addPlacemark(
-            Point(
-                viewModel.coffeeShop.latitude.toDouble(),
-                viewModel.coffeeShop.longitude.toDouble()
-            ),
-            imageProvider
-        )
-        binding.mapView.map.move(
-            CameraPosition(
-                Point(
-                    viewModel.coffeeShop.latitude.toDouble(),
-                    viewModel.coffeeShop.longitude.toDouble()
-                ),
-                15.0f, 0.0f, 0.0f
-            )
-        )
+
+        showCoffeeShopOnMap()
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.eventsFlow
@@ -161,4 +144,28 @@ class CoffeeFragment : BaseFragment<FragmentCoffeeBinding, CoffeeViewModel>() {
         }
     }
 
+    private fun showCoffeeShopOnMap() {
+        binding.mapView.setNoninteractive(true)
+        val imageProvider = DrawableImageProvider(
+            requireContext(),
+            R.drawable.ic_action_name
+        )
+        binding.mapView.map.mapObjects.addPlacemark(
+            Point(
+                viewModel.coffeeShop.latitude.toDouble(),
+                viewModel.coffeeShop.longitude.toDouble()
+            ),
+            imageProvider
+        )
+        binding.mapView.map.move(
+            CameraPosition(
+                Point(
+                    viewModel.coffeeShop.latitude.toDouble(),
+                    viewModel.coffeeShop.longitude.toDouble()
+                ),
+                //                        TODO добавить константу
+                15.0f, 0.0f, 0.0f
+            )
+        )
+    }
 }
