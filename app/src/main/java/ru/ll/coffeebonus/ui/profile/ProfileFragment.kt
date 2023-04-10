@@ -87,13 +87,26 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding, ProfileViewModel>()
                     binding.errorTextView.text = it
                 }
         }
+
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.coffeeShopsStateFlow
-                .filterNotNull()
+            viewModel.stateFlow
                 .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
                 .collect {
-                    adapter.items = it
-                    adapter.notifyDataSetChanged()
+                    Timber.d("state $it")
+                    when (it) {
+                        is ProfileViewModel.State.Error -> {
+                            adapter.items = listOf(ErrorUiItem(it.message))
+                            adapter.notifyDataSetChanged()
+                        }
+                        is ProfileViewModel.State.Loading -> {
+                            adapter.items = listOf(LoadingUiItem)
+                            adapter.notifyDataSetChanged()
+                        }
+                        is ProfileViewModel.State.Success -> {
+                            adapter.items = it.data
+                            adapter.notifyDataSetChanged()
+                        }
+                    }
                 }
         }
     }
@@ -101,6 +114,8 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding, ProfileViewModel>()
     private fun initRecyclerView() {
         val delegateManager = AdapterDelegatesManager<List<AdapterItem>>()
         delegateManager.addDelegate(coffeeShopAdapterDelegate())
+        delegateManager.addDelegate(loadingAdapterDelegate())
+        delegateManager.addDelegate(errorAdapterDelegate())
         adapter = ListDelegationAdapter(delegateManager)
         binding.recyclerView.adapter = adapter
     }
