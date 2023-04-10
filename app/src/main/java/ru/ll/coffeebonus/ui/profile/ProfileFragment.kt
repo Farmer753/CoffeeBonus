@@ -115,7 +115,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding, ProfileViewModel>()
         val delegateManager = AdapterDelegatesManager<List<AdapterItem>>()
         delegateManager.addDelegate(coffeeShopAdapterDelegate())
         delegateManager.addDelegate(loadingAdapterDelegate())
-        delegateManager.addDelegate(errorAdapterDelegate())
+        delegateManager.addDelegate(errorAdapterDelegate {viewModel.loadFavoriteCoffeeShop()})
         adapter = ListDelegationAdapter(delegateManager)
         binding.recyclerView.adapter = adapter
     }

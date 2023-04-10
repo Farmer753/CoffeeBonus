@@ -16,6 +16,7 @@ import ru.ll.coffeebonus.domain.user.UserRepository
 import ru.ll.coffeebonus.ui.BaseViewModel
 import timber.log.Timber
 import javax.inject.Inject
+import kotlin.random.Random
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
@@ -85,7 +86,9 @@ class ProfileViewModel @Inject constructor(
                 val favoriteCoffeeShops =
                     coffeeShopRepository.getCoffeeShopsByIds(favoriteCoffeeShopIds)
                         .map { converter.convert(it) }
-//                throw IllegalStateException("рандомная ошибка")
+                if (Random.nextBoolean()) {
+                    throw IllegalStateException("рандомная ошибка")
+                }
                 _stateFlow.emit(State.Success(favoriteCoffeeShops))
                 Timber.d("favoriteCoffeeShops $favoriteCoffeeShops")
             } catch (t: Throwable) {

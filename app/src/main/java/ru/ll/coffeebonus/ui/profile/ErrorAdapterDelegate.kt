@@ -4,7 +4,7 @@ import com.hannesdorfmann.adapterdelegates4.dsl.adapterDelegateViewBinding
 import ru.ll.coffeebonus.databinding.ItemErrorBinding
 import ru.ll.coffeebonus.ui.adapter.AdapterItem
 
-fun errorAdapterDelegate() =
+fun errorAdapterDelegate(clickListener: () -> Unit) =
     adapterDelegateViewBinding<ErrorUiItem, AdapterItem, ItemErrorBinding>(
         { layoutInflater, parent ->
             ItemErrorBinding.inflate(layoutInflater, parent, false)
@@ -12,7 +12,8 @@ fun errorAdapterDelegate() =
         bind {
             with(binding) {
                 errorTextView.text = item.error
-//                TODO кнопка
+                retryButton.setOnClickListener { clickListener() }
+
             }
         }
     }
