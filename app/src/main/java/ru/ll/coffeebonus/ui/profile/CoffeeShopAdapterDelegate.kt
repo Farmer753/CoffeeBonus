@@ -8,13 +8,14 @@ import ru.ll.coffeebonus.databinding.ItemCoffeeShopBinding
 import ru.ll.coffeebonus.ui.adapter.AdapterItem
 import ru.ll.coffeebonus.util.DrawableImageProvider
 
-fun coffeeShopAdapterDelegate() =
+fun coffeeShopAdapterDelegate(clickListener: (CoffeeShopUiItem) -> Unit) =
     adapterDelegateViewBinding<CoffeeShopUiItem, AdapterItem, ItemCoffeeShopBinding>(
         { layoutInflater, parent ->
             ItemCoffeeShopBinding.inflate(layoutInflater, parent, false)
         }) {
         bind {
             with(binding) {
+                root.setOnClickListener{clickListener(item)}
                 nameTextView.text = item.name
                 addressTextView.text = item.address
 

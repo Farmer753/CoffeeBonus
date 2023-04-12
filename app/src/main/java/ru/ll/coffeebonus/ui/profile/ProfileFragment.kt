@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
@@ -15,9 +16,11 @@ import com.hannesdorfmann.adapterdelegates4.ListDelegationAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
+import ru.ll.coffeebonus.R
 import ru.ll.coffeebonus.databinding.FragmentProfileBinding
 import ru.ll.coffeebonus.ui.BaseFragment
 import ru.ll.coffeebonus.ui.adapter.AdapterItem
+import ru.ll.coffeebonus.ui.coffee.CoffeeFragment
 import timber.log.Timber
 
 @AndroidEntryPoint
@@ -47,6 +50,14 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding, ProfileViewModel>()
                     when (event) {
                         is ProfileViewModel.Event.CloseScreen -> {
                             findNavController().popBackStack()
+                        }
+                        is ProfileViewModel.Event.NavigateToCoffee -> {
+                            findNavController().navigate(
+                                R.id.action_profile_to_coffee,
+                                bundleOf(
+                                    CoffeeFragment.ARG_COFFEESHOP to event.coffeeShop
+                                )
+                            )
                         }
                     }
                 }
@@ -113,9 +124,9 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding, ProfileViewModel>()
 
     private fun initRecyclerView() {
         val delegateManager = AdapterDelegatesManager<List<AdapterItem>>()
-        delegateManager.addDelegate(coffeeShopAdapterDelegate())
+        delegateManager.addDelegate(coffeeShopAdapterDelegate { viewModel.onCoffeeShopClick(it) })
         delegateManager.addDelegate(loadingAdapterDelegate())
-        delegateManager.addDelegate(errorAdapterDelegate {viewModel.loadFavoriteCoffeeShop()})
+        delegateManager.addDelegate(errorAdapterDelegate { viewModel.loadFavoriteCoffeeShop() })
         adapter = ListDelegationAdapter(delegateManager)
         binding.recyclerView.adapter = adapter
     }

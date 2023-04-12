@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import ru.ll.coffeebonus.domain.CoffeeShop
 import ru.ll.coffeebonus.domain.SessionRepository
 import ru.ll.coffeebonus.domain.coffeeshop.CoffeeShopRepository
 import ru.ll.coffeebonus.domain.coffeeshop.ModelConverter
@@ -28,6 +29,7 @@ class ProfileViewModel @Inject constructor(
 
     sealed class Event {
         object CloseScreen : Event()
+        data class NavigateToCoffee(val coffeeShop: CoffeeShop) : Event()
     }
 
     private val eventChannel = Channel<Event>(Channel.BUFFERED)
@@ -95,6 +97,12 @@ class ProfileViewModel @Inject constructor(
                 Timber.e(t, "ошибка получения списка избранных кофеен")
                 _stateFlow.emit(State.Error(t.message ?: "неизвестная ошибка coroutines"))
             }
+        }
+    }
+
+    fun onCoffeeShopClick(coffeeShop: CoffeeShopUiItem) {
+        viewModelScope.launch {
+            eventChannel.send(Event.NavigateToCoffee(converter.convert(coffeeShop)))
         }
     }
 

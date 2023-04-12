@@ -13,7 +13,6 @@ fun errorAdapterDelegate(clickListener: () -> Unit) =
             with(binding) {
                 errorTextView.text = item.error
                 retryButton.setOnClickListener { clickListener() }
-
             }
         }
     }

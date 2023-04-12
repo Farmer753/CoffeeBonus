@@ -9,7 +9,15 @@
         android:id="@+id/profileFragment"
         android:name="ru.ll.coffeebonus.ui.profile.ProfileFragment"
         android:label="Profile"
-        tools:layout="@layout/fragment_profile" />
+        tools:layout="@layout/fragment_profile">
+        <action
+            android:id="@+id/action_profile_to_coffee"
+            app:destination="@+id/coffeeDialogFragment">
+            <argument
+                android:name="ARG_COFFEESHOP"
+                app:argType="ru.ll.coffeebonus.domain.CoffeeShop" />
+        </action>
+    </fragment>
 
 
     <fragment
