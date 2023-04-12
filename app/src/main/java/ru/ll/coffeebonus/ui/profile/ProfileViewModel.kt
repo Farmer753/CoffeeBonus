@@ -4,10 +4,14 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import ru.ll.coffeebonus.domain.CoffeeShop
 import ru.ll.coffeebonus.domain.SessionRepository
+import ru.ll.coffeebonus.domain.coffeeshop.CoffeeShopRepository
+import ru.ll.coffeebonus.domain.coffeeshop.ModelConverter
 import ru.ll.coffeebonus.domain.user.FirestoreUser
 import ru.ll.coffeebonus.domain.user.UserRepository
 import ru.ll.coffeebonus.ui.BaseViewModel
@@ -18,11 +22,14 @@ import kotlin.random.Random
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     val sessionRepository: SessionRepository,
-    val userRepository: UserRepository
+    val userRepository: UserRepository,
+    val coffeeShopRepository: CoffeeShopRepository,
+    val converter: ModelConverter
 ) : BaseViewModel() {
 
     sealed class Event {
         object CloseScreen : Event()
+        data class NavigateToCoffee(val coffeeShop: CoffeeShop) : Event()
     }
 
     private val eventChannel = Channel<Event>(Channel.BUFFERED)
@@ -37,8 +44,18 @@ class ProfileViewModel @Inject constructor(
     private val _loadingStateFlow = MutableStateFlow<Boolean>(false)
     val loadingStateFlow = _loadingStateFlow.asStateFlow()
 
+    sealed class State {
+        object Loading : State()
+        data class Error(val message: String) : State()
+        data class Success(val data: List<CoffeeShopUiItem>) : State()
+    }
+
+    private val _stateFlow: MutableStateFlow<State> = MutableStateFlow(State.Loading)
+    val stateFlow: StateFlow<State> = _stateFlow
+
     init {
         loadUser()
+        loadFavoriteCoffeeShop()
     }
 
     fun loadUser() {
@@ -58,6 +75,34 @@ class ProfileViewModel @Inject constructor(
             } finally {
                 _loadingStateFlow.emit(false)
             }
+        }
+    }
+
+    fun loadFavoriteCoffeeShop() {
+        viewModelScope.launch {
+            _stateFlow.emit(State.Loading)
+            try {
+                val favoriteCoffeeShopIds =
+                    userRepository.getFirestoreUser().favoriteCoffeeShop.take(10)
+                Timber.d("favoriteCoffeeShopIds $favoriteCoffeeShopIds")
+                val favoriteCoffeeShops =
+                    coffeeShopRepository.getCoffeeShopsByIds(favoriteCoffeeShopIds)
+                        .map { converter.convert(it) }
+                if (Random.nextBoolean()) {
+                    throw IllegalStateException("рандомная ошибка")
+                }
+                _stateFlow.emit(State.Success(favoriteCoffeeShops))
+                Timber.d("favoriteCoffeeShops $favoriteCoffeeShops")
+            } catch (t: Throwable) {
+                Timber.e(t, "ошибка получения списка избранных кофеен")
+                _stateFlow.emit(State.Error(t.message ?: "неизвестная ошибка coroutines"))
+            }
+        }
+    }
+
+    fun onCoffeeShopClick(coffeeShop: CoffeeShopUiItem) {
+        viewModelScope.launch {
+            eventChannel.send(Event.NavigateToCoffee(converter.convert(coffeeShop)))
         }
     }
 

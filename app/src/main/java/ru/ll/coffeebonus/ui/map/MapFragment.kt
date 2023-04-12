@@ -30,6 +30,7 @@ import ru.ll.coffeebonus.databinding.FragmentMapBinding
 import ru.ll.coffeebonus.domain.CoffeeShop
 import ru.ll.coffeebonus.ui.BaseFragment
 import ru.ll.coffeebonus.ui.coffee.CoffeeFragment.Companion.ARG_COFFEESHOP
+import ru.ll.coffeebonus.ui.login.LoginFragment
 import ru.ll.coffeebonus.util.DrawableImageProvider
 import timber.log.Timber
 import java.lang.Float.max
@@ -242,22 +243,20 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                 .collect { event ->
                     when (event) {
                         is MapViewModel.Event.NavigateToCoffee -> {
-                            try {
-                                Timber.d("event ${event.coffeeShop}")
-                                findNavController().navigate(
-                                    R.id.action_map_to_coffee, bundleOf(
-                                        ARG_COFFEESHOP to event.coffeeShop
-                                    )
+                            Timber.d("event ${event.coffeeShop}")
+                            findNavController().navigate(
+                                R.id.action_map_to_coffee,
+                                bundleOf(
+                                    ARG_COFFEESHOP to event.coffeeShop
                                 )
-                            } catch (e: Throwable) {
-                                Timber.e(e, "Ошибка навигации")
-                            }
+                            )
                         }
                         MapViewModel.Event.NavigateToProfile -> findNavController().navigate(
                             R.id.action_map_to_profile
                         )
                         MapViewModel.Event.NavigateToLogin -> findNavController().navigate(
-                            R.id.action_map_to_login
+                            R.id.action_map_to_login,
+                            bundleOf(LoginFragment.ARG_OPEN_PROFILE to true)
                         )
                     }
                 }

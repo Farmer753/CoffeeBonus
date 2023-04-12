@@ -76,4 +76,10 @@ dependencies {
 
 //    coil
     implementation 'io.coil-kt:coil:2.2.2'
+
+    //recyclerView delegates
+    def adapterDelegatesVersion = "4.3.0"
+    implementation "com.hannesdorfmann:adapterdelegates4-kotlin-dsl:$adapterDelegatesVersion"
+    implementation "com.hannesdorfmann:adapterdelegates4-kotlin-dsl-viewbinding:$adapterDelegatesVersion"
+
 }

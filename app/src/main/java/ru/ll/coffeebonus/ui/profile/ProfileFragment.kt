@@ -4,17 +4,24 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearSnapHelper
 import coil.load
+import com.hannesdorfmann.adapterdelegates4.AdapterDelegatesManager
+import com.hannesdorfmann.adapterdelegates4.ListDelegationAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
+import ru.ll.coffeebonus.R
 import ru.ll.coffeebonus.databinding.FragmentProfileBinding
 import ru.ll.coffeebonus.ui.BaseFragment
+import ru.ll.coffeebonus.ui.adapter.AdapterItem
+import ru.ll.coffeebonus.ui.coffee.CoffeeFragment
 import timber.log.Timber
 
 @AndroidEntryPoint
@@ -25,6 +32,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding, ProfileViewModel>()
     override val bindingInflater: (LayoutInflater, ViewGroup?, Boolean) -> FragmentProfileBinding =
         FragmentProfileBinding::inflate
 
+    private lateinit var adapter: ListDelegationAdapter<List<AdapterItem>>
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -33,6 +41,9 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding, ProfileViewModel>()
         }
         binding.buttonRetry.setOnClickListener { viewModel.loadUser() }
         binding.buttonLogout.setOnClickListener { viewModel.logout() }
+
+        initRecyclerView()
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.eventsFlow
                 .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
@@ -40,6 +51,14 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding, ProfileViewModel>()
                     when (event) {
                         is ProfileViewModel.Event.CloseScreen -> {
                             findNavController().popBackStack()
+                        }
+                        is ProfileViewModel.Event.NavigateToCoffee -> {
+                            findNavController().navigate(
+                                R.id.action_profile_to_coffee,
+                                bundleOf(
+                                    CoffeeFragment.ARG_COFFEESHOP to event.coffeeShop
+                                )
+                            )
                         }
                     }
                 }
@@ -80,6 +99,39 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding, ProfileViewModel>()
                     binding.errorTextView.text = it
                 }
         }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.stateFlow
+                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .collect {
+                    Timber.d("state $it")
+                    when (it) {
+                        is ProfileViewModel.State.Error -> {
+                            adapter.items = listOf(ErrorUiItem(it.message))
+                            adapter.notifyDataSetChanged()
+                        }
+                        is ProfileViewModel.State.Loading -> {
+                            adapter.items = listOf(LoadingUiItem)
+                            adapter.notifyDataSetChanged()
+                        }
+                        is ProfileViewModel.State.Success -> {
+                            adapter.items = it.data
+                            adapter.notifyDataSetChanged()
+                        }
+                    }
+                }
+        }
+    }
+
+    private fun initRecyclerView() {
+        val delegateManager = AdapterDelegatesManager<List<AdapterItem>>()
+        delegateManager.addDelegate(coffeeShopAdapterDelegate { viewModel.onCoffeeShopClick(it) })
+        delegateManager.addDelegate(loadingAdapterDelegate())
+        delegateManager.addDelegate(errorAdapterDelegate { viewModel.loadFavoriteCoffeeShop() })
+        val snapHelper = LinearSnapHelper()
+        snapHelper.attachToRecyclerView(binding.recyclerView)
+        adapter = ListDelegationAdapter(delegateManager)
+        binding.recyclerView.adapter = adapter
     }
 
 }

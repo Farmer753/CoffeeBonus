@@ -34,9 +34,19 @@ class LoginFragment : BaseFragment<FragmentLoginBinding, LoginViewModel>() {
 
     companion object {
         const val REQ_ONE_TAP = 42
+        const val ARG_OPEN_PROFILE = "ARG_OPEN_PROFILE"
     }
 
-    override val viewModel: LoginViewModel by viewModels()
+    @Inject
+    lateinit var viewModelAssistedFactory: LoginViewModel.Factory
+
+    override val viewModel: LoginViewModel by viewModels {
+        LoginViewModel.provideFactory(
+            viewModelAssistedFactory,
+            requireArguments().getBoolean(ARG_OPEN_PROFILE)
+        )
+    }
+
     private lateinit var oneTapClient: SignInClient
     private lateinit var signInRequest: BeginSignInRequest
 
@@ -124,6 +134,8 @@ class LoginFragment : BaseFragment<FragmentLoginBinding, LoginViewModel>() {
                         is LoginViewModel.Event.ShowMessage -> {
                             showMessage(event.message)
                         }
+                        is LoginViewModel.Event.CloseScreen ->
+                            findNavController().popBackStack()
                     }
                 }
         }

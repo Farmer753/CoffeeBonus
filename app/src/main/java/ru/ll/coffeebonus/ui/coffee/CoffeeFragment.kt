@@ -1,76 +1,176 @@
 package ru.ll.coffeebonus.ui.coffee
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.snackbar.Snackbar
+import com.hannesdorfmann.adapterdelegates4.AdapterDelegatesManager
+import com.hannesdorfmann.adapterdelegates4.ListDelegationAdapter
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.CameraPosition
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import ru.ll.coffeebonus.R
 import ru.ll.coffeebonus.databinding.FragmentCoffeeBinding
-import ru.ll.coffeebonus.util.DrawableImageProvider
 import ru.ll.coffeebonus.domain.CoffeeShop
+import ru.ll.coffeebonus.ui.BaseFragment
+import ru.ll.coffeebonus.ui.login.LoginFragment.Companion.ARG_OPEN_PROFILE
+import ru.ll.coffeebonus.util.DrawableImageProvider
+import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class CoffeeFragment : BottomSheetDialogFragment() {
+class CoffeeFragment : BaseFragment<FragmentCoffeeBinding, CoffeeViewModel>() {
 
     companion object {
         const val ARG_COFFEESHOP = "ARG_COFFEESHOP"
     }
 
-    private var _binding: FragmentCoffeeBinding? = null
-    protected val binding get() = _binding!!
-
-    val bindingInflater: (LayoutInflater, ViewGroup?, Boolean) -> FragmentCoffeeBinding =
+    override val bindingInflater: (LayoutInflater, ViewGroup?, Boolean) -> FragmentCoffeeBinding =
         FragmentCoffeeBinding::inflate
 
     @Inject
     lateinit var viewModelAssistedFactory: CoffeeViewModel.Factory
 
-    private val viewModel: CoffeeViewModel by viewModels {
+    override val viewModel: CoffeeViewModel by viewModels {
         CoffeeViewModel.provideFactory(
             viewModelAssistedFactory,
             requireArguments().getSerializable(ARG_COFFEESHOP) as CoffeeShop
         )
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.name.text = "Название ${viewModel.coffeeShop.name}"
-        binding.address.text = "Адрес ${viewModel.coffeeShop.address}"
-        binding.map.setNoninteractive(true)
+        binding.nameTextView.text = "Название ${viewModel.coffeeShop.name}"
+        binding.addressTextView.text = "Адрес ${viewModel.coffeeShop.address}"
+        binding.favoriteImageView.setOnClickListener { viewModel.toggleFavorite() }
+        binding.buttonRetry.setOnClickListener { viewModel.loadCoffeeShop() }
+        binding.closeImageView.setOnClickListener { viewModel.onCloseClick() }
+
+        showCoffeeShopOnMap()
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.eventsFlow
+                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .collect { event ->
+                    Timber.d("$event event")
+                    when (event) {
+                        is CoffeeViewModel.Event.ShowNeedAuthorisationMessage -> {
+                            val snackbar = Snackbar.make(
+                                binding.root,
+                                R.string.need_authorisation,
+                                Snackbar.LENGTH_LONG
+                            )
+                            snackbar.setAction(R.string.login) { viewModel.onLoginClick() }
+                            snackbar.show()
+
+                        }
+                        is CoffeeViewModel.Event.NavigationToLogin -> {
+                            findNavController().navigate(
+                                R.id.action_coffee_to_login,
+                                bundleOf(ARG_OPEN_PROFILE to false)
+
+                            )
+                        }
+                        is CoffeeViewModel.Event.ShowMessage -> showMessage(event.message)
+                        is CoffeeViewModel.Event.CloseScreen -> {
+                            findNavController().popBackStack()
+                        }
+                    }
+                }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.loadingFavoriteStateFlow
+                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .collect {
+                    if (it) {
+                        binding.progressFavoritesView.visibility = View.VISIBLE
+                    } else {
+                        binding.progressFavoritesView.visibility = View.GONE
+                    }
+                }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.loadingStateFlow
+                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .collect {
+                    if (it) {
+                        binding.progressView.visibility = View.VISIBLE
+                    } else {
+                        binding.progressView.visibility = View.GONE
+                    }
+                }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.favoriteCoffeeShopStateFlow
+                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .collect {
+                    if (it) {
+                        Timber.d("кофейня в избранном")
+                        binding.favoriteImageView.setImageResource(R.drawable.ic_baseline_favorite_24)
+                    } else {
+                        Timber.d("кофейня не в избранном")
+                        binding.favoriteImageView.setImageResource(R.drawable.ic_baseline_favorite_border_24)
+                    }
+                }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.errorStateFlow
+                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .collect {
+                    Timber.d("ошибка $it")
+                    binding.errorView.visibility = if (it != null) {
+                        View.VISIBLE
+                    } else {
+                        View.GONE
+                    }
+                    binding.errorTextView.text = it
+                }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.firestoreCoffeeShopStateFlow
+                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .collect {
+                    Timber.d("firestoreCoffeeShopStateFlow $it")
+
+                }
+        }
+    }
+
+    private fun showCoffeeShopOnMap() {
+        binding.mapView.setNoninteractive(true)
         val imageProvider = DrawableImageProvider(
             requireContext(),
             R.drawable.ic_action_name
         )
-        binding.map.map.mapObjects.addPlacemark(
+        binding.mapView.map.mapObjects.addPlacemark(
             Point(
                 viewModel.coffeeShop.latitude.toDouble(),
                 viewModel.coffeeShop.longitude.toDouble()
             ),
             imageProvider
         )
-        binding.map.map.move(
+        binding.mapView.map.move(
             CameraPosition(
                 Point(
                     viewModel.coffeeShop.latitude.toDouble(),
                     viewModel.coffeeShop.longitude.toDouble()
                 ),
+                //                        TODO добавить константу
                 15.0f, 0.0f, 0.0f
             )
         )
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = bindingInflater(inflater, container, false)
-        return binding.root
-    }
+
 }
