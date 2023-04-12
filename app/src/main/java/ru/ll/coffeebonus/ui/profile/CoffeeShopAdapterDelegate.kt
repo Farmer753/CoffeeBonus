@@ -24,6 +24,7 @@ fun coffeeShopAdapterDelegate(clickListener: (CoffeeShopUiItem) -> Unit) =
                     context,
                     R.drawable.ic_action_name
                 )
+                mapView.map.mapObjects.clear()
                 mapView.map.mapObjects.addPlacemark(
                     Point(
                         item.latitude.toDouble(),
