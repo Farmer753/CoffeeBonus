@@ -40,6 +40,10 @@ class MapViewModel @Inject constructor(
             eventChannel.send(Event.NavigateToCoffee(coffeeShop))
         }
     }
+//TODO полученный список кофешопов преобразовать в кофешопы на карте,
+// сделав запросы в firestore на предмет наличия кофеен в базе и избранности кофеен юзера.
+// И только после этого эмитить в searchResult
+//    Считаем нормальным игрнорировать ошибки обработки данных
 
     fun onSearchResult(result: List<CoffeeShop>) {
         result.forEach {
