@@ -11,12 +11,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
-import com.hannesdorfmann.adapterdelegates4.AdapterDelegatesManager
-import com.hannesdorfmann.adapterdelegates4.ListDelegationAdapter
-import com.yandex.mapkit.geometry.Point
-import com.yandex.mapkit.map.CameraPosition
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import ru.ll.coffeebonus.R
@@ -24,7 +19,7 @@ import ru.ll.coffeebonus.databinding.FragmentCoffeeBinding
 import ru.ll.coffeebonus.domain.CoffeeShop
 import ru.ll.coffeebonus.ui.BaseFragment
 import ru.ll.coffeebonus.ui.login.LoginFragment.Companion.ARG_OPEN_PROFILE
-import ru.ll.coffeebonus.util.DrawableImageProvider
+import ru.ll.coffeebonus.ui.util.showMarker
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -57,7 +52,7 @@ class CoffeeFragment : BaseFragment<FragmentCoffeeBinding, CoffeeViewModel>() {
         binding.buttonRetry.setOnClickListener { viewModel.loadCoffeeShop() }
         binding.closeImageView.setOnClickListener { viewModel.onCloseClick() }
 
-        showCoffeeShopOnMap()
+        binding.mapView.showMarker(viewModel.coffeeShop.latitude, viewModel.coffeeShop.longitude)
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.eventsFlow
@@ -146,31 +141,4 @@ class CoffeeFragment : BaseFragment<FragmentCoffeeBinding, CoffeeViewModel>() {
                 }
         }
     }
-
-    private fun showCoffeeShopOnMap() {
-        binding.mapView.setNoninteractive(true)
-        val imageProvider = DrawableImageProvider(
-            requireContext(),
-            R.drawable.ic_action_name
-        )
-        binding.mapView.map.mapObjects.addPlacemark(
-            Point(
-                viewModel.coffeeShop.latitude.toDouble(),
-                viewModel.coffeeShop.longitude.toDouble()
-            ),
-            imageProvider
-        )
-        binding.mapView.map.move(
-            CameraPosition(
-                Point(
-                    viewModel.coffeeShop.latitude.toDouble(),
-                    viewModel.coffeeShop.longitude.toDouble()
-                ),
-                //                        TODO добавить константу
-                15.0f, 0.0f, 0.0f
-            )
-        )
-    }
-
-
 }
