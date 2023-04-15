@@ -59,6 +59,8 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun loadUser() {
+        val er: String? = null
+        er?.trim()
         viewModelScope.launch {
             try {
                 _errorStateFlow.emit(null)

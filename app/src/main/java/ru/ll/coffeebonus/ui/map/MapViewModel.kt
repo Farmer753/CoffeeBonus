@@ -10,13 +10,18 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import ru.ll.coffeebonus.domain.CoffeeShop
 import ru.ll.coffeebonus.domain.SessionRepository
+import ru.ll.coffeebonus.domain.coffeeshop.CoffeeShopRepository
+import ru.ll.coffeebonus.domain.user.UserRepository
 import ru.ll.coffeebonus.ui.BaseViewModel
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
     val test: String,
-    val sessionRepository: SessionRepository
+    val sessionRepository: SessionRepository,
+    val coffeeShopRepository: CoffeeShopRepository,
+    val userRepository: UserRepository
 ) : BaseViewModel() {
 
     sealed class Event {
@@ -45,12 +50,34 @@ class MapViewModel @Inject constructor(
 // И только после этого эмитить в searchResult
 //    Считаем нормальным игрнорировать ошибки обработки данных
 
+//    TODO различные варианты отображения маркера на карте в зависимости от наличия кофейни в базе
+//     и избранности кофейни
+
+//    TODO посмотреть, насколько сильно все сломается в коде,
+//     если мы будем его запускать для незалогиненого юзера
+
     fun onSearchResult(result: List<CoffeeShop>) {
         result.forEach {
             coffeeShops.put(it.id, it)
         }
         viewModelScope.launch {
-            _searchResult.emit(coffeeShops.values.toList())
+//            _searchResult.emit(coffeeShops.values.toList())
+            val favoriteCoffeeShopIds = userRepository.getFirestoreUser().favoriteCoffeeShop
+            val coffeeResult = coffeeShopRepository.getByYandexId(result.map { it.id })
+            Timber.d("результат $coffeeResult")
+            val coffeeShopsOnMap = result.map { coffeeShop ->
+                val firestoreId = coffeeResult.find { it.id == coffeeShop.id }?.firestoreId
+                CoffeeShopOnMap(
+                    firestoreId = firestoreId,
+                    id= coffeeShop.id,
+                    name = coffeeShop.name,
+                    address = coffeeShop.address,
+                    longitude = coffeeShop.longitude,
+                    latitude = coffeeShop.latitude,
+                    favorite = favoriteCoffeeShopIds.contains(firestoreId)
+                )
+            }
+            Timber.d("coffeeShopsOnMap $coffeeShopsOnMap")
         }
     }
 
