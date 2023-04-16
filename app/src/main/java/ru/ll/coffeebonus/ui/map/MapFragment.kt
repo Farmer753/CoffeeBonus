@@ -183,7 +183,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
             Animation(Animation.Type.SMOOTH, ANIMATION_DURATION)
         ) {
             viewModel.mapClick(
-                placeMark.userData as CoffeeShop
+                placeMark.userData as CoffeeShopOnMap
             )
         }
         true
@@ -265,13 +265,13 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.searchResult
                 .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
-                .collect { coffeeShops: List<CoffeeShop> ->
+                .collect { coffeeShops: List<CoffeeShopOnMap> ->
                     val imageProvider = DrawableImageProvider(
                         requireContext(),
                         R.drawable.ic_action_name
                     )
                     val oldShownPlacemarks = shownPlacemarks.size
-                    val shownCoffeeShopsIds = shownPlacemarks.map { (it.userData as CoffeeShop).id }
+                    val shownCoffeeShopsIds = shownPlacemarks.map { (it.userData as CoffeeShopOnMap).id }
                     shownPlacemarks += coffeeShops.filter {
                         !shownCoffeeShopsIds.contains(it.id)
                     }.map {
