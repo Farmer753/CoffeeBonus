@@ -270,6 +270,10 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                         requireContext(),
                         R.drawable.ic_action_name
                     )
+                    val imageProviderFavorite = DrawableImageProvider(
+                        requireContext(),
+                        R.drawable.ic_baseline_favorite_24
+                    )
                     val oldShownPlacemarks = shownPlacemarks.size
                     val shownCoffeeShopsIds =
                         shownPlacemarks.map { (it.userData as CoffeeShopOnMap).id }
@@ -278,7 +282,11 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                     }.map {
                         val placeMark: PlacemarkMapObject = mapObjects.addPlacemark(
                             Point(it.latitude.toDouble(), it.longitude.toDouble()),
-                            imageProvider
+                            if (it.favorite) {
+                                imageProviderFavorite
+                            } else {
+                                imageProvider
+                            }
                         )
                         placeMark.addTapListener(placeMarkTapListener)
                         placeMark.userData = it
