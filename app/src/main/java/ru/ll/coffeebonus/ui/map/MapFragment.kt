@@ -115,8 +115,8 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                 requireContext(),
                 R.drawable.ic_action_my
             )
-            if (markerMy != null) {
-                binding.mapview.map.mapObjects.remove(markerMy!!)
+            markerMy?.let {
+                binding.mapview.map.mapObjects.remove(it)
             }
             markerMy = binding.mapview.map.mapObjects.addPlacemark(
                 Point(p0.position.latitude, p0.position.longitude),
@@ -271,7 +271,8 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                         R.drawable.ic_action_name
                     )
                     val oldShownPlacemarks = shownPlacemarks.size
-                    val shownCoffeeShopsIds = shownPlacemarks.map { (it.userData as CoffeeShopOnMap).id }
+                    val shownCoffeeShopsIds =
+                        shownPlacemarks.map { (it.userData as CoffeeShopOnMap).id }
                     shownPlacemarks += coffeeShops.filter {
                         !shownCoffeeShopsIds.contains(it.id)
                     }.map {
@@ -297,6 +298,14 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         shownPlacemarks.clear()
         mapObjects.clear()
         super.onStop()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        Timber.d("onDestroyView")
+        locationManager?.unsubscribe(myLocationListener)
+        markerMy = null
+        mapMoved = false
     }
 
     override fun onStart() {
