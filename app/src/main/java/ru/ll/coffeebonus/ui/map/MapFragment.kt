@@ -266,13 +266,17 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
             viewModel.searchResult
                 .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
                 .collect { coffeeShops: List<CoffeeShopOnMap> ->
-                    val imageProvider = DrawableImageProvider(
+                    val imageProviderUnRegistered = DrawableImageProvider(
                         requireContext(),
                         R.drawable.ic_action_name
                     )
                     val imageProviderFavorite = DrawableImageProvider(
                         requireContext(),
                         R.drawable.ic_baseline_favorite_24
+                    )
+                    val imageProviderRegistered = DrawableImageProvider(
+                        requireContext(),
+                        R.drawable.ic_baseline_blender_24
                     )
                     val oldShownPlacemarks = shownPlacemarks.size
                     val shownCoffeeShopsIds =
@@ -285,7 +289,11 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                             if (it.favorite) {
                                 imageProviderFavorite
                             } else {
-                                imageProvider
+                                if (it.firestoreId == null) {
+                                    imageProviderUnRegistered
+                                } else {
+                                    imageProviderRegistered
+                                }
                             }
                         )
                         placeMark.addTapListener(placeMarkTapListener)

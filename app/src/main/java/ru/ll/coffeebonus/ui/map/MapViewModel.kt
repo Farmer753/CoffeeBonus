@@ -57,9 +57,6 @@ class MapViewModel @Inject constructor(
         }
     }
 
-//    TODO различные варианты отображения маркера на карте в зависимости от наличия кофейни в базе
-//     и избранности кофейни
-
     fun onSearchResult(coffeeShopsFromYandexSearch: List<CoffeeShop>) {
         if (coffeeShopsFromYandexSearch.isEmpty()) {
             return
