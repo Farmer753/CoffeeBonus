@@ -2,6 +2,10 @@ package ru.ll.coffeebonus.ui.map
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.LayerDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -32,8 +36,10 @@ import ru.ll.coffeebonus.ui.BaseFragment
 import ru.ll.coffeebonus.ui.coffee.CoffeeFragment.Companion.ARG_COFFEESHOP
 import ru.ll.coffeebonus.ui.login.LoginFragment
 import ru.ll.coffeebonus.util.DrawableImageProvider
+import ru.ll.coffeebonus.util.ProgramaticalDrawableImageProvider
 import timber.log.Timber
 import java.lang.Float.max
+
 
 @AndroidEntryPoint
 class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
@@ -64,20 +70,19 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
 
     private val clusterListener: ClusterListener =
         ClusterListener {
-            val imageProvider = DrawableImageProvider(
-                requireContext(),
-                R.drawable.ic_cluster
-            )
+            val coffeeShopsOnMapFromCluster =
+                it.placemarks.map { placemark -> (placemark.userData as CoffeeShopOnMap) }
+            val imageProvider =
+                ProgramaticalDrawableImageProvider(generateClusterIcon(coffeeShopsOnMapFromCluster))
             it.addClusterTapListener(clusterTapListener)
             it.appearance.setIcon(imageProvider)
         }
-    val shownPlacemarks = mutableSetOf<PlacemarkMapObject>()
-    lateinit var mapObjects: ClusterizedPlacemarkCollection
-    var searchManager: SearchManager? = null
-    var searchSession: Session? = null
-    val searchListener = object : Session.SearchListener {
+    private val shownPlacemarks = mutableSetOf<PlacemarkMapObject>()
+    private lateinit var mapObjects: ClusterizedPlacemarkCollection
+    private var searchManager: SearchManager? = null
+    private var searchSession: Session? = null
+    private val searchListener = object : Session.SearchListener {
         override fun onSearchResponse(response: Response) {
-//            Timber.d("Ещё результаты ${searchSession!!.hasNextPage()}")
             if (searchSession!!.hasNextPage()) {
                 searchSession!!.fetchNextPage(this)
             }
@@ -106,17 +111,17 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         }
     }
 
-    var mapMoved = false
-    var markerMy: PlacemarkMapObject? = null
-    var locationManager: LocationManager? = null
-    val myLocationListener = object : LocationListener {
+    private var mapMoved = false
+    private var markerMy: PlacemarkMapObject? = null
+    private var locationManager: LocationManager? = null
+    private val myLocationListener = object : LocationListener {
         override fun onLocationUpdated(p0: Location) {
             val imageProvider = DrawableImageProvider(
                 requireContext(),
                 R.drawable.ic_action_my
             )
-            if (markerMy != null) {
-                binding.mapview.map.mapObjects.remove(markerMy!!)
+            markerMy?.let {
+                binding.mapview.map.mapObjects.remove(it)
             }
             markerMy = binding.mapview.map.mapObjects.addPlacemark(
                 Point(p0.position.latitude, p0.position.longitude),
@@ -139,7 +144,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         }
     }
 
-    val locationPermissionRequest = registerForActivityResult(
+    private val locationPermissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions: Map<String, Boolean> ->
         when {
@@ -158,11 +163,11 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         }
     }
 
-    val tapListener: GeoObjectTapListener = GeoObjectTapListener {
+    private val tapListener: GeoObjectTapListener = GeoObjectTapListener {
         true
     }
 
-    val cameraListener = CameraListener { p0, p1, p2, p3 ->
+    private val cameraListener = CameraListener { _, p1, _, _ ->
         if (p1.zoom > COFFEE_SHOP_SEARCH_ZOOM_DEFAULT) {
             searchCoffee()
         }
@@ -173,21 +178,22 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
     override val bindingInflater: (LayoutInflater, ViewGroup?, Boolean) -> FragmentMapBinding =
         FragmentMapBinding::inflate
 
-    val placeMarkTapListener: MapObjectTapListener = MapObjectTapListener { placeMark, point ->
-        showMessage("Нажата")
-        val zoom = max(COFFEE_SHOP_ZOOM_DEFAULT, binding.mapview.map.cameraPosition.zoom)
-        binding.mapview.map.move(
-            CameraPosition(
-                point, zoom, 0.0f, 0.0f
-            ),
-            Animation(Animation.Type.SMOOTH, ANIMATION_DURATION)
-        ) {
-            viewModel.mapClick(
-                placeMark.userData as CoffeeShop
-            )
+    private val placeMarkTapListener: MapObjectTapListener =
+        MapObjectTapListener { placeMark, point ->
+            showMessage("Нажата")
+            val zoom = max(COFFEE_SHOP_ZOOM_DEFAULT, binding.mapview.map.cameraPosition.zoom)
+            binding.mapview.map.move(
+                CameraPosition(
+                    point, zoom, 0.0f, 0.0f
+                ),
+                Animation(Animation.Type.SMOOTH, ANIMATION_DURATION)
+            ) {
+                viewModel.mapClick(
+                    placeMark.userData as CoffeeShopOnMap
+                )
+            }
+            true
         }
-        true
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -265,19 +271,36 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.searchResult
                 .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
-                .collect { coffeeShops: List<CoffeeShop> ->
-                    val imageProvider = DrawableImageProvider(
+                .collect { coffeeShops: List<CoffeeShopOnMap> ->
+                    val imageProviderUnRegistered = DrawableImageProvider(
                         requireContext(),
                         R.drawable.ic_action_name
                     )
+                    val imageProviderFavorite = DrawableImageProvider(
+                        requireContext(),
+                        R.drawable.ic_baseline_favorite_24
+                    )
+                    val imageProviderRegistered = DrawableImageProvider(
+                        requireContext(),
+                        R.drawable.ic_baseline_blender_24
+                    )
                     val oldShownPlacemarks = shownPlacemarks.size
-                    val shownCoffeeShopsIds = shownPlacemarks.map { (it.userData as CoffeeShop).id }
+                    val shownCoffeeShopsIds =
+                        shownPlacemarks.map { (it.userData as CoffeeShopOnMap).id }
                     shownPlacemarks += coffeeShops.filter {
                         !shownCoffeeShopsIds.contains(it.id)
                     }.map {
                         val placeMark: PlacemarkMapObject = mapObjects.addPlacemark(
                             Point(it.latitude.toDouble(), it.longitude.toDouble()),
-                            imageProvider
+                            if (it.favorite) {
+                                imageProviderFavorite
+                            } else {
+                                if (it.firestoreId == null) {
+                                    imageProviderUnRegistered
+                                } else {
+                                    imageProviderRegistered
+                                }
+                            }
                         )
                         placeMark.addTapListener(placeMarkTapListener)
                         placeMark.userData = it
@@ -299,13 +322,21 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         super.onStop()
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        Timber.d("onDestroyView")
+        locationManager?.unsubscribe(myLocationListener)
+        markerMy = null
+        mapMoved = false
+    }
+
     override fun onStart() {
         super.onStart()
         MapKitFactory.getInstance().onStart()
         binding.mapview.onStart()
     }
 
-    fun searchCoffee() {
+    private fun searchCoffee() {
         searchManager = SearchFactory.getInstance().createSearchManager(
             SearchManagerType.ONLINE
         )
@@ -318,7 +349,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
         )
     }
 
-    fun permission(): Boolean {
+    private fun permission(): Boolean {
         val coarseLocationGranted = ContextCompat.checkSelfPermission(
             requireContext(),
             Manifest.permission.ACCESS_COARSE_LOCATION
@@ -328,5 +359,42 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
             Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
         return coarseLocationGranted || fineLocationGranted
+    }
+
+    private fun generateClusterIcon(coffeeShopsOnMap: List<CoffeeShopOnMap>): Drawable {
+        val hasFavorite = coffeeShopsOnMap.firstOrNull { it.favorite } != null
+        val hasRegistered = coffeeShopsOnMap.firstOrNull { it.firestoreId != null } != null
+
+        val border = GradientDrawable()
+        border.shape = GradientDrawable.OVAL
+        border.setColor(Color.WHITE)
+
+        val background = GradientDrawable()
+        background.shape = GradientDrawable.OVAL
+        background.setColor(Color.BLACK)
+
+        val clip = GradientDrawable()
+        clip.shape = GradientDrawable.OVAL
+        clip.setColor(Color.RED)
+
+        val layers = arrayOf<Drawable>(background, border, clip)
+        val layerDrawable = LayerDrawable(layers)
+
+        layerDrawable.setLayerSize(0, 100, 100)
+        layerDrawable.setLayerSize(1, 50, 50)
+        layerDrawable.setLayerSize(2, 20, 20)
+
+        layerDrawable.setLayerInset(0, 0, 0, 0, 0)
+        layerDrawable.setLayerInset(1, 25, 25, 0, 0)
+        layerDrawable.setLayerInset(2, 40, 40, 0, 0)
+
+        if (!hasFavorite) {
+            layerDrawable.setLayerSize(2, 0, 0)
+            if (!hasRegistered) {
+                layerDrawable.setLayerSize(1, 0, 0)
+            }
+        }
+
+        return layerDrawable
     }
 }
