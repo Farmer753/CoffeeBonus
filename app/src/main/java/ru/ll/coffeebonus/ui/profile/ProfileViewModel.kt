@@ -90,9 +90,9 @@ class ProfileViewModel @Inject constructor(
                 val favoriteCoffeeShops =
                     coffeeShopRepository.getCoffeeShopsByIds(favoriteCoffeeShopIds)
                         .map { converter.convert(it) }
-                if (Random.nextBoolean()) {
-                    throw IllegalStateException("рандомная ошибка")
-                }
+//                if (Random.nextBoolean()) {
+//                    throw IllegalStateException("рандомная ошибка")
+//                }
                 _stateFlow.emit(State.Success(favoriteCoffeeShops))
                 Timber.d("favoriteCoffeeShops $favoriteCoffeeShops")
             } catch (t: Throwable) {
