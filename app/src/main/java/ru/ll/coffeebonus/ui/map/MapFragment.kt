@@ -88,6 +88,17 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
             }
             viewModel.onSearchResult(
                 response.collection.children.map {
+                    val address =
+                        it.obj?.metadataContainer?.getItem(BusinessObjectMetadata::class.java)
+                            ?.address!!
+                    val addressString = address.components.filter {
+                        val streetHouse = it.kinds.filter {
+                            it == Address.Component.Kind.STREET || it == Address.Component.Kind.HOUSE
+                        }
+                        streetHouse.isNotEmpty()
+                    }.joinToString(transform = {
+                        it.name
+                    })
                     CoffeeShop(
                         id = it.obj?.metadataContainer?.getItem(UriObjectMetadata::class.java)
                             ?.uris
@@ -95,9 +106,7 @@ class MapFragment : BaseFragment<FragmentMapBinding, MapViewModel>() {
                             ?.value
                             ?.toUri()?.getQueryParameter("oid")!!,
                         name = it.obj?.name!!,
-                        address = it.obj?.metadataContainer?.getItem(BusinessObjectMetadata::class.java)
-                            ?.address
-                            ?.formattedAddress ?: "",
+                        address = addressString,
                         longitude = it.obj?.geometry?.first()?.point!!.longitude.toFloat(),
                         latitude = it.obj?.geometry?.first()?.point!!.latitude.toFloat()
                     )
