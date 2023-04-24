@@ -108,17 +108,18 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding, ProfileViewModel>()
                     when (it) {
                         is ProfileViewModel.State.Error -> {
                             adapter.items = listOf(ErrorUiItem(it.message))
-                            adapter.notifyDataSetChanged()
                         }
                         is ProfileViewModel.State.Loading -> {
                             adapter.items = listOf(LoadingUiItem)
-                            adapter.notifyDataSetChanged()
                         }
                         is ProfileViewModel.State.Success -> {
                             adapter.items = it.data
-                            adapter.notifyDataSetChanged()
+                        }
+                        is ProfileViewModel.State.Empty -> {
+                            adapter.items = listOf(EmptyUiItem)
                         }
                     }
+                    adapter.notifyDataSetChanged()
                 }
         }
     }
@@ -128,10 +129,10 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding, ProfileViewModel>()
         delegateManager.addDelegate(coffeeShopAdapterDelegate { viewModel.onCoffeeShopClick(it) })
         delegateManager.addDelegate(loadingAdapterDelegate())
         delegateManager.addDelegate(errorAdapterDelegate { viewModel.loadFavoriteCoffeeShop() })
+        delegateManager.addDelegate(emptyAdapterDelegate())
         val snapHelper = LinearSnapHelper()
         snapHelper.attachToRecyclerView(binding.recyclerView)
         adapter = ListDelegationAdapter(delegateManager)
         binding.recyclerView.adapter = adapter
     }
-
 }
