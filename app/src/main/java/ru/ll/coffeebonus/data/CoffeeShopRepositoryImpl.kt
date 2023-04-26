@@ -48,6 +48,9 @@ class CoffeeShopRepositoryImpl(
         if (listId.size > 10) {
             throw IllegalArgumentException("Список id кофеен не может быть больше 10")
         }
+        if (listId.isEmpty()) {
+            return emptyList()
+        }
         return bd.collection(COLLECTION_COFFEE_SHOPS).whereIn(FIELD_FIRESTORE_ID, listId)
             .get().await().toObjects(FirestoreCoffeeShop::class.java)
     }

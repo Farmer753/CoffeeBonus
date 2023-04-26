@@ -7,4 +7,5 @@
     <string name="logout">Выйти</string>
     <string name="retry">Повторить</string>
     <string name="need_authorisation">Необходима авторизация</string>
+    <string name="empty_list">Здесь будут избранные кофейни</string>
 </resources>

@@ -17,7 +17,6 @@ import ru.ll.coffeebonus.domain.user.UserRepository
 import ru.ll.coffeebonus.ui.BaseViewModel
 import timber.log.Timber
 import javax.inject.Inject
-import kotlin.random.Random
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
@@ -48,6 +47,7 @@ class ProfileViewModel @Inject constructor(
         object Loading : State()
         data class Error(val message: String) : State()
         data class Success(val data: List<CoffeeShopUiItem>) : State()
+        object Empty : State()
     }
 
     private val _stateFlow: MutableStateFlow<State> = MutableStateFlow(State.Loading)
@@ -93,8 +93,12 @@ class ProfileViewModel @Inject constructor(
 //                if (Random.nextBoolean()) {
 //                    throw IllegalStateException("рандомная ошибка")
 //                }
-                _stateFlow.emit(State.Success(favoriteCoffeeShops))
-                Timber.d("favoriteCoffeeShops $favoriteCoffeeShops")
+                if (favoriteCoffeeShops.isEmpty()) {
+                    _stateFlow.emit(State.Empty)
+                } else {
+                    _stateFlow.emit(State.Success(favoriteCoffeeShops))
+                    Timber.d("favoriteCoffeeShops $favoriteCoffeeShops")
+                }
             } catch (t: Throwable) {
                 Timber.e(t, "ошибка получения списка избранных кофеен")
                 _stateFlow.emit(State.Error(t.message ?: "неизвестная ошибка coroutines"))

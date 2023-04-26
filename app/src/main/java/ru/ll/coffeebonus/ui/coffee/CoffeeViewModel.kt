@@ -51,7 +51,7 @@ class CoffeeViewModel @AssistedInject constructor(
         object ShowNeedAuthorisationMessage : Event()
         data class ShowMessage(val message: String) : Event()
         object NavigationToLogin : Event()
-        object CloseScreen: Event()
+        object CloseScreen : Event()
     }
 
     private val eventChannel = Channel<Event>(Channel.BUFFERED)
@@ -154,10 +154,4 @@ class CoffeeViewModel @AssistedInject constructor(
             eventChannel.send(Event.CloseScreen)
         }
     }
-    // начинаем эмитить прогресс +
-    // метод, который будет получать кофейню из firestore +
-    // если кофейня есть, нужно узнать, является ли она для юзера избранной +
-    // в конце эмитим stateflow firestore и избранности кофейни +
-    // в слечае ошибки эмитим ошибку +
-    // в любом случае эмитим окончание прогресса+
 }
