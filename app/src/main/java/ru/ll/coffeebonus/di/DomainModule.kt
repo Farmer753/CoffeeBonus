@@ -6,10 +6,12 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import ru.ll.coffeebonus.data.CoffeeBonusRepositoryImpl
 import ru.ll.coffeebonus.data.CoffeeShopRepositoryImpl
 import ru.ll.coffeebonus.data.SessionRepositoryImpl
 import ru.ll.coffeebonus.data.UserRepositoryImpl
 import ru.ll.coffeebonus.domain.SessionRepository
+import ru.ll.coffeebonus.domain.bonus.CoffeeBonusRepository
 import ru.ll.coffeebonus.domain.coffeeshop.CoffeeShopRepository
 import ru.ll.coffeebonus.domain.coffeeshop.ModelConverter
 import ru.ll.coffeebonus.domain.user.UserRepository
@@ -39,6 +41,14 @@ object DomainModule {
         bd: FirebaseFirestore
     ): CoffeeShopRepository {
         return CoffeeShopRepositoryImpl(bd)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCoffeeBonusRepository(
+        bd: FirebaseFirestore
+    ): CoffeeBonusRepository {
+        return CoffeeBonusRepositoryImpl(bd)
     }
 
     @Provides
