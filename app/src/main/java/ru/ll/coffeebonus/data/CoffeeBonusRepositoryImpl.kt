@@ -21,11 +21,13 @@ class CoffeeBonusRepositoryImpl(
         documentReference.update(FIELD_COFFEE_BONUS, firestoreBonus).await()
     }
 
-    override suspend fun edit(firestoreBonus: FirestoreBonus) {
-        TODO("Not yet implemented")
+    override suspend fun edit(firestoreId: String, newFreeCoffee: FirestoreBonus) {
+        val documentReference = bd.collection(COLLECTION_COFFEE_SHOPS).document(firestoreId)
+        documentReference.update(FIELD_COFFEE_BONUS, newFreeCoffee).await()
     }
 
-    override suspend fun delete(firestoreBonus: FirestoreBonus) {
-        TODO("Not yet implemented")
+    override suspend fun delete(firestoreId: String) {
+        val documentReference = bd.collection(COLLECTION_COFFEE_SHOPS).document(firestoreId)
+        documentReference.update(FIELD_COFFEE_BONUS, null).await()
     }
 }
