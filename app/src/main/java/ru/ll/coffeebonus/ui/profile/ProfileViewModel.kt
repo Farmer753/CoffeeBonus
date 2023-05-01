@@ -29,6 +29,7 @@ class ProfileViewModel @Inject constructor(
     sealed class Event {
         object CloseScreen : Event()
         data class NavigateToCoffee(val coffeeShop: CoffeeShop) : Event()
+        object NavigateToCoffeeAll : Event()
     }
 
     private val eventChannel = Channel<Event>(Channel.BUFFERED)
@@ -46,7 +47,7 @@ class ProfileViewModel @Inject constructor(
     sealed class State {
         object Loading : State()
         data class Error(val message: String) : State()
-        data class Success(val data: List<CoffeeShopUiItem>) : State()
+        data class Success(val data: List<CoffeeShopUiItem>, val coffeeShopAll: Boolean) : State()
         object Empty : State()
     }
 
@@ -96,7 +97,11 @@ class ProfileViewModel @Inject constructor(
                 if (favoriteCoffeeShops.isEmpty()) {
                     _stateFlow.emit(State.Empty)
                 } else {
-                    _stateFlow.emit(State.Success(favoriteCoffeeShops))
+                    if (favoriteCoffeeShops.size > 10) {
+                        _stateFlow.emit(State.Success(favoriteCoffeeShops, true))
+                    } else {
+                        _stateFlow.emit(State.Success(favoriteCoffeeShops, false))
+                    }
                     Timber.d("favoriteCoffeeShops $favoriteCoffeeShops")
                 }
             } catch (t: Throwable) {
@@ -109,6 +114,12 @@ class ProfileViewModel @Inject constructor(
     fun onCoffeeShopClick(coffeeShop: CoffeeShopUiItem) {
         viewModelScope.launch {
             eventChannel.send(Event.NavigateToCoffee(converter.convert(coffeeShop)))
+        }
+    }
+
+    fun onCoffeeShopAllClick() {
+        viewModelScope.launch {
+            eventChannel.send(Event.NavigateToCoffeeAll())
         }
     }
 

@@ -54,5 +54,4 @@ class CoffeeShopRepositoryImpl(
         return bd.collection(COLLECTION_COFFEE_SHOPS).whereIn(FIELD_FIRESTORE_ID, listId)
             .get().await().toObjects(FirestoreCoffeeShop::class.java)
     }
-
 }

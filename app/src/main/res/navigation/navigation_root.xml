@@ -17,6 +17,23 @@
                 android:name="ARG_COFFEESHOP"
                 app:argType="ru.ll.coffeebonus.domain.CoffeeShop" />
         </action>
+        <action
+            android:id="@+id/action_profile_to_coffeeAll"
+            app:destination="@+id/coffeeAllFragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/coffeeAllFragment"
+        android:name="ru.ll.coffeebonus.ui.coffeeAll.CoffeeAllFragment"
+        android:label="CoffeeAll"
+        tools:layout="@layout/fragment_coffee_all">
+        <action
+            android:id="@+id/action_profile_to_coffee_all"
+            app:destination="@+id/coffeeDialogFragment">
+            <argument
+                android:name="ARG_COFFEESHOP"
+                app:argType="ru.ll.coffeebonus.domain.CoffeeShop" />
+        </action>
     </fragment>
 
 

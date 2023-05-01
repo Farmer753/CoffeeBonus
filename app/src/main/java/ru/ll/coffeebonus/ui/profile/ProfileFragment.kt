@@ -60,6 +60,11 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding, ProfileViewModel>()
                                 )
                             )
                         }
+                        is ProfileViewModel.Event.NavigateToCoffeeAll -> {
+                            findNavController().navigate(
+                                R.id.action_profile_to_coffeeAll
+                            )
+                        }
                     }
                 }
         }
@@ -129,6 +134,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding, ProfileViewModel>()
     private fun initRecyclerView() {
         val delegateManager = AdapterDelegatesManager<List<AdapterItem>>()
         delegateManager.addDelegate(coffeeShopAdapterDelegate { viewModel.onCoffeeShopClick(it) })
+        delegateManager.addDelegate(coffeeShopAllAdapterDelegate { viewModel.onCoffeeShopAllClick() })
         delegateManager.addDelegate(loadingAdapterDelegate())
         delegateManager.addDelegate(errorAdapterDelegate { viewModel.loadFavoriteCoffeeShop() })
         delegateManager.addDelegate(emptyAdapterDelegate())

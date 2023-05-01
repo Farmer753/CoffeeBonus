@@ -149,7 +149,6 @@ class CoffeeViewModel @AssistedInject constructor(
             } finally {
                 _loadingStateFlow.emit(false)
             }
-
         }
     }
 
