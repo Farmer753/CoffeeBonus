@@ -119,7 +119,7 @@ class ProfileViewModel @Inject constructor(
 
     fun onCoffeeShopAllClick() {
         viewModelScope.launch {
-            eventChannel.send(Event.NavigateToCoffeeAll())
+            eventChannel.send(Event.NavigateToCoffeeAll)
         }
     }
 
