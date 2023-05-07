@@ -8,4 +8,8 @@
     <string name="retry">Повторить</string>
     <string name="need_authorisation">Необходима авторизация</string>
     <string name="empty_list">Здесь будут избранные кофейни</string>
+    <string name="not_bonus">Нет бонусной программы</string>
+    <string name="eddBonus">Добавить бонусную программу</string>
+    <string name="add_coffee_bonus_size">Введите количество кружек кофе для бонуса</string>
+    <string name="save">Сохранить</string>
 </resources>

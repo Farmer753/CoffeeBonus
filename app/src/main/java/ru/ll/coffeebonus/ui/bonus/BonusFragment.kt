@@ -3,6 +3,8 @@ package ru.ll.coffeebonus.ui.bonus
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import dagger.hilt.android.AndroidEntryPoint
@@ -29,5 +31,10 @@ class BonusFragment : BaseFragment<FragmentBonusBinding, BonusViewModel>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Timber.d("FragmentBonusBinding")
+        binding.addBonusButton.setOnClickListener {
+            binding.addBonusButton.visibility = GONE
+            binding.bonusInputLayout.visibility = VISIBLE
+            binding.sendMaterialButton.visibility = VISIBLE
+        }
     }
 }
