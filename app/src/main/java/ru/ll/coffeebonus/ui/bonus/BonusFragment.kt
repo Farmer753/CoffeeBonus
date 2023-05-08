@@ -6,7 +6,11 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import android.view.ViewGroup.MarginLayoutParams
 import android.widget.ImageView
+import androidx.core.content.ContextCompat
+import androidx.core.view.get
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.viewModels
 import dagger.hilt.android.AndroidEntryPoint
 import ru.ll.coffeebonus.R
@@ -42,6 +46,15 @@ class BonusFragment : BaseFragment<FragmentBonusBinding, BonusViewModel>() {
             val imageView = ImageView(requireContext())
             imageView.setImageResource(R.drawable.ic_coffee)
             binding.flexBox.addView(imageView)
+            imageView.updateLayoutParams<MarginLayoutParams> {
+                bottomMargin =
+                    resources.getDimensionPixelSize(R.dimen.coffee_in_bonus_bottom_margin)
+            }
+        }
+        binding.addCoffeeButton.setOnClickListener {
+            (binding.flexBox[0] as ImageView).setColorFilter(
+                ContextCompat.getColor(requireContext(), R.color.purple_700)
+            )
         }
     }
 }
