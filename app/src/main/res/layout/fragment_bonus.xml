@@ -90,13 +90,24 @@
             app:layout_constraintTop_toBottomOf="@+id/flexBox" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/deleteCoffeeBonusButton"
+            android:id="@+id/editCoffeeBonusButton"
             android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="@string/edit"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/flexBox" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/deleteCoffeeBonusButton"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:text="@string/delete"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/flexBox" />
+            app:layout_constraintEnd_toEndOf="@+id/editCoffeeBonusButton"
+            app:layout_constraintTop_toBottomOf="@+id/editCoffeeBonusButton" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
