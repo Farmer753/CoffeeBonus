@@ -9,8 +9,8 @@
         android:id="@+id/notBonusConstraintLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        android:visibility="gone">
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:id="@+id/notBonusTextView"
@@ -65,7 +65,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/bonusConstraintLayout"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -74,17 +74,29 @@
             android:id="@+id/flexBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginStart="16dp"
             app:flexWrap="wrap"
-            />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/addCoffeeButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:text="@string/add"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/flexBox"
-            android:text="@string/add"/>
+            app:layout_constraintTop_toBottomOf="@+id/flexBox" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/deleteCoffeeBonusButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="@string/delete"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/flexBox" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

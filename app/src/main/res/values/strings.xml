@@ -13,4 +13,5 @@
     <string name="add_coffee_bonus_size">Введите количество кружек кофе для бонуса</string>
     <string name="save">Сохранить</string>
     <string name="add">Добавить</string>
+    <string name="delete">Удалить</string>
 </resources>
