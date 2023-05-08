@@ -53,7 +53,7 @@ class BonusFragment : BaseFragment<FragmentBonusBinding, BonusViewModel>() {
         }
         binding.addCoffeeButton.setOnClickListener {
             (binding.flexBox[0] as ImageView).setColorFilter(
-                ContextCompat.getColor(requireContext(), R.color.purple_700)
+                ContextCompat.getColor(requireContext(), R.color.ic_launcher_background)
             )
         }
     }
