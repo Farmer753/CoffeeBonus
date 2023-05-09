@@ -12,10 +12,16 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.get
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import ru.ll.coffeebonus.R
 import ru.ll.coffeebonus.databinding.FragmentBonusBinding
+import ru.ll.coffeebonus.domain.CoffeeShop
 import ru.ll.coffeebonus.ui.BaseFragment
+import ru.ll.coffeebonus.ui.coffee.CoffeeFragment.Companion.ARG_COFFEESHOP
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -30,7 +36,8 @@ class BonusFragment : BaseFragment<FragmentBonusBinding, BonusViewModel>() {
 
     override val viewModel: BonusViewModel by viewModels {
         BonusViewModel.provideFactory(
-            viewModelAssistedFactory
+            viewModelAssistedFactory,
+            requireArguments().getSerializable(ARG_COFFEESHOP) as CoffeeShop
         )
     }
 
@@ -42,6 +49,7 @@ class BonusFragment : BaseFragment<FragmentBonusBinding, BonusViewModel>() {
             binding.bonusInputLayout.visibility = VISIBLE
             binding.sendMaterialButton.visibility = VISIBLE
         }
+        binding.buttonRetry.setOnClickListener { viewModel.loadInitialData() }
         (0..14).forEach {
             val imageView = ImageView(requireContext())
             imageView.setImageResource(R.drawable.ic_coffee)
@@ -55,6 +63,30 @@ class BonusFragment : BaseFragment<FragmentBonusBinding, BonusViewModel>() {
             (binding.flexBox[0] as ImageView).setColorFilter(
                 ContextCompat.getColor(requireContext(), R.color.ic_launcher_background)
             )
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.loadingStateFlow
+                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .collect {
+                    if (it) {
+                        binding.progressView.visibility = VISIBLE
+                    } else {
+                        binding.progressView.visibility = GONE
+                    }
+                }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.errorStateFlow
+                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .collect {
+                    Timber.d("ошибка $it")
+                    binding.errorView.visibility = if (it != null) {
+                        VISIBLE
+                    } else {
+                        GONE
+                    }
+                    binding.errorTextView.text = it
+                }
         }
     }
 }

@@ -2,33 +2,84 @@ package ru.ll.coffeebonus.ui.bonus
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import ru.ll.coffeebonus.domain.CoffeeShop
+import ru.ll.coffeebonus.domain.SessionRepository
+import ru.ll.coffeebonus.domain.coffeeshop.CoffeeShopRepository
+import ru.ll.coffeebonus.domain.user.UserRepository
 import ru.ll.coffeebonus.ui.BaseViewModel
 import ru.ll.coffeebonus.ui.coffee.CoffeeViewModel
+import timber.log.Timber
+import kotlin.random.Random
 
-class BonusViewModel@AssistedInject constructor(): BaseViewModel() {
+class BonusViewModel @AssistedInject constructor(
+    @Assisted("coffeeShop") val coffeeShop: CoffeeShop,
+    val sessionRepository: SessionRepository,
+    val coffeeShopRepository: CoffeeShopRepository,
+    val userRepository: UserRepository
+) : BaseViewModel() {
     @Suppress("UNCHECKED_CAST")
     companion object {
         fun provideFactory(
-            assistedFactory: Factory
+            assistedFactory: Factory,
+            coffeeShop: CoffeeShop
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return assistedFactory.create() as T
+                return assistedFactory.create(coffeeShop) as T
             }
         }
     }
 
     @AssistedFactory
     interface Factory {
-        fun create(): BonusViewModel
+        fun create(
+            @Assisted("coffeeShop") coffeeShop: CoffeeShop
+        ): BonusViewModel
     }
+
+    private val _loadingStateFlow = MutableStateFlow<Boolean>(false)
+    val loadingStateFlow = _loadingStateFlow.asStateFlow()
+
+    private val _errorStateFlow = MutableStateFlow<String?>(null)
+    val errorStateFlow = _errorStateFlow.asStateFlow()
+
+    private val _bonusCoffeeStateFlow = MutableStateFlow<Boolean>(false)
+    val bonusCoffeeStateFlow = _bonusCoffeeStateFlow.asStateFlow()
+
+    private val _countCoffeeStateFlow = MutableStateFlow<Boolean>(false)
+    val countCoffeeStateFlow = _countCoffeeStateFlow.asStateFlow()
 
     init {
         loadInitialData()
     }
 
-    private fun loadInitialData() {
+    fun loadInitialData() {
+
+        viewModelScope.launch {
+            try {
+                _loadingStateFlow.emit(true)
+                _errorStateFlow.emit(null)
+                delay(5000)
+//                if (Random.nextBoolean()) {
+                    throw IllegalStateException("рандомная ошибка")
+//                }
+
+            } catch (t: Throwable) {
+                Timber.e(t, "ошибка")
+                _errorStateFlow.emit(t.message ?: "Неизвестная ошибка")
+            } finally {
+                _loadingStateFlow.emit(false)
+            }
+
+        }
+    }
 //    Заинжектить coffeeShop
 //     CoffeeShopRepository, SessionRepository, UserRepository
 
@@ -45,7 +96,7 @@ class BonusViewModel@AssistedInject constructor(): BaseViewModel() {
 //                Если авторизация есть - узнаем сколько ля этой кофейни юзер выпил чашек кофе
 //     Отловить ошибку, показать кнопку retry
 //     Закончить крутилку в любом случае
-    }
-
-
 }
+
+
+

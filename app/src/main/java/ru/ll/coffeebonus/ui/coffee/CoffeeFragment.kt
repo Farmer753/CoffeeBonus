@@ -18,6 +18,7 @@ import ru.ll.coffeebonus.R
 import ru.ll.coffeebonus.databinding.FragmentCoffeeBinding
 import ru.ll.coffeebonus.domain.CoffeeShop
 import ru.ll.coffeebonus.ui.BaseFragment
+import ru.ll.coffeebonus.ui.bonus.BonusFragment
 import ru.ll.coffeebonus.ui.login.LoginFragment.Companion.ARG_OPEN_PROFILE
 import ru.ll.coffeebonus.ui.util.showMarker
 import timber.log.Timber
@@ -46,7 +47,13 @@ class CoffeeFragment : BaseFragment<FragmentCoffeeBinding, CoffeeViewModel>() {
     @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.nameTextView.text = "Название ${viewModel.coffeeShop.name}"
+        if (childFragmentManager.fragments.isEmpty()) {
+            val bonusFragment = BonusFragment()
+            bonusFragment.arguments = bundleOf(ARG_COFFEESHOP to viewModel.coffeeShop)
+            childFragmentManager.beginTransaction().add(R.id.fragmentContainerView, bonusFragment)
+                .commit()
+        }
+        binding.nameTextView.text = viewModel.coffeeShop.name
         binding.addressTextView.text = "Адрес ${viewModel.coffeeShop.address}"
         binding.favoriteImageView.setOnClickListener { viewModel.toggleFavorite() }
         binding.buttonRetry.setOnClickListener { viewModel.loadCoffeeShop() }
