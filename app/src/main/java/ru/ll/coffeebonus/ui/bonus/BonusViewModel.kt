@@ -12,12 +12,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import ru.ll.coffeebonus.domain.CoffeeShop
 import ru.ll.coffeebonus.domain.SessionRepository
+import ru.ll.coffeebonus.domain.bonus.FirestoreBonus
 import ru.ll.coffeebonus.domain.coffeeshop.CoffeeShopRepository
 import ru.ll.coffeebonus.domain.user.UserRepository
 import ru.ll.coffeebonus.ui.BaseViewModel
-import ru.ll.coffeebonus.ui.coffee.CoffeeViewModel
 import timber.log.Timber
-import kotlin.random.Random
 
 class BonusViewModel @AssistedInject constructor(
     @Assisted("coffeeShop") val coffeeShop: CoffeeShop,
@@ -50,7 +49,7 @@ class BonusViewModel @AssistedInject constructor(
     private val _errorStateFlow = MutableStateFlow<String?>(null)
     val errorStateFlow = _errorStateFlow.asStateFlow()
 
-    private val _bonusCoffeeStateFlow = MutableStateFlow<Boolean>(false)
+    private val _bonusCoffeeStateFlow = MutableStateFlow<FirestoreBonus?>(null)
     val bonusCoffeeStateFlow = _bonusCoffeeStateFlow.asStateFlow()
 
     private val _countCoffeeStateFlow = MutableStateFlow<Boolean>(false)
@@ -66,11 +65,24 @@ class BonusViewModel @AssistedInject constructor(
             try {
                 _loadingStateFlow.emit(true)
                 _errorStateFlow.emit(null)
-                delay(5000)
+//                delay(5000)
 //                if (Random.nextBoolean()) {
-                    throw IllegalStateException("рандомная ошибка")
+//                    throw IllegalStateException("рандомная ошибка")
 //                }
+                val firestoreCoffeeShop = coffeeShopRepository.getByYandexId(coffeeShop.id)
+                if (firestoreCoffeeShop == null) {
+                    Timber.d("нет кофешопа")
+                } else {
+                    Timber.d("есть кофешоп")
+                    if (firestoreCoffeeShop.coffeeBonus == null) {
+                        Timber.d("нет бонусной программы")
+                    } else {
+                        Timber.d("есть бонусная программа")
+                    }
 
+
+                }
+                _bonusCoffeeStateFlow.emit(firestoreCoffeeShop?.coffeeBonus)
             } catch (t: Throwable) {
                 Timber.e(t, "ошибка")
                 _errorStateFlow.emit(t.message ?: "Неизвестная ошибка")

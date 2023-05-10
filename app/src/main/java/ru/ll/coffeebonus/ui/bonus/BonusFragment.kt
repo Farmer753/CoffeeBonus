@@ -50,15 +50,7 @@ class BonusFragment : BaseFragment<FragmentBonusBinding, BonusViewModel>() {
             binding.sendMaterialButton.visibility = VISIBLE
         }
         binding.buttonRetry.setOnClickListener { viewModel.loadInitialData() }
-        (0..14).forEach {
-            val imageView = ImageView(requireContext())
-            imageView.setImageResource(R.drawable.ic_coffee)
-            binding.flexBox.addView(imageView)
-            imageView.updateLayoutParams<MarginLayoutParams> {
-                bottomMargin =
-                    resources.getDimensionPixelSize(R.dimen.coffee_in_bonus_bottom_margin)
-            }
-        }
+
         binding.addCoffeeButton.setOnClickListener {
             (binding.flexBox[0] as ImageView).setColorFilter(
                 ContextCompat.getColor(requireContext(), R.color.ic_launcher_background)
@@ -86,6 +78,29 @@ class BonusFragment : BaseFragment<FragmentBonusBinding, BonusViewModel>() {
                         GONE
                     }
                     binding.errorTextView.text = it
+                }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.bonusCoffeeStateFlow
+                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .collect {
+                    if (it == null) {
+                        binding.notBonusConstraintLayout.visibility = VISIBLE
+                        binding.bonusConstraintLayout.visibility = GONE
+                    } else {
+                        binding.notBonusConstraintLayout.visibility = GONE
+                        binding.bonusConstraintLayout.visibility = VISIBLE
+                        binding.flexBox.removeAllViews()
+                        (0 until it.bonusQuantity).forEach {
+                            val imageView = ImageView(requireContext())
+                            imageView.setImageResource(R.drawable.ic_coffee)
+                            binding.flexBox.addView(imageView)
+                            imageView.updateLayoutParams<MarginLayoutParams> {
+                                bottomMargin =
+                                    resources.getDimensionPixelSize(R.dimen.coffee_in_bonus_bottom_margin)
+                            }
+                        }
+                    }
                 }
         }
     }
