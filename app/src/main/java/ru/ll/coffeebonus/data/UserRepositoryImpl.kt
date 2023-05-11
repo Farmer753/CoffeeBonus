@@ -31,7 +31,8 @@ class UserRepositoryImpl(
             name = firebaseAuth.currentUser!!.displayName!!,
             avatarUrl = firebaseAuth.currentUser!!.photoUrl!!.toString(),
             email = firebaseAuth.currentUser!!.email!!,
-            favoriteCoffeeShop = listOf()
+            favoriteCoffeeShop = listOf(),
+            bonusPrograms = listOf()
         )
     }
 

@@ -14,6 +14,7 @@ import ru.ll.coffeebonus.domain.CoffeeShop
 import ru.ll.coffeebonus.domain.SessionRepository
 import ru.ll.coffeebonus.domain.bonus.FirestoreBonus
 import ru.ll.coffeebonus.domain.coffeeshop.CoffeeShopRepository
+import ru.ll.coffeebonus.domain.user.UserBonusPrograms
 import ru.ll.coffeebonus.domain.user.UserRepository
 import ru.ll.coffeebonus.ui.BaseViewModel
 import timber.log.Timber
@@ -52,7 +53,7 @@ class BonusViewModel @AssistedInject constructor(
     private val _bonusCoffeeStateFlow = MutableStateFlow<FirestoreBonus?>(null)
     val bonusCoffeeStateFlow = _bonusCoffeeStateFlow.asStateFlow()
 
-    private val _countCoffeeStateFlow = MutableStateFlow<Boolean>(false)
+    private val _countCoffeeStateFlow = MutableStateFlow<Int>(0)
     val countCoffeeStateFlow = _countCoffeeStateFlow.asStateFlow()
 
     init {
@@ -78,9 +79,21 @@ class BonusViewModel @AssistedInject constructor(
                         Timber.d("нет бонусной программы")
                     } else {
                         Timber.d("есть бонусная программа")
+                        val userAuthorized = sessionRepository.userLogined.value
+                        if (userAuthorized) {
+                            Timber.d("юзер авторизован")
+                            val user = userRepository.getFirestoreUser()
+                            Timber.d("юзер $user")
+                            val currentCoffeeShopUserBonusProgram: UserBonusPrograms? =
+                                user.bonusPrograms.find { it.id == firestoreCoffeeShop.firestoreId }
+                            if (currentCoffeeShopUserBonusProgram != null) {
+                                delay(1000)
+                                _countCoffeeStateFlow.emit(currentCoffeeShopUserBonusProgram.count)
+                            }
+                        } else {
+                            Timber.d("юзер не авторизован")
+                        }
                     }
-
-
                 }
                 _bonusCoffeeStateFlow.emit(firestoreCoffeeShop?.coffeeBonus)
             } catch (t: Throwable) {
