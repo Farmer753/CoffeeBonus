@@ -26,6 +26,10 @@ class ProfileViewModel @Inject constructor(
     val converter: ModelConverter
 ) : BaseViewModel() {
 
+    companion object {
+        const val FAVORITE_COFFEE_SHOP_ITEM_COUNT = 10
+    }
+
     sealed class Event {
         object CloseScreen : Event()
         data class NavigateToCoffee(val coffeeShop: CoffeeShop) : Event()
@@ -85,7 +89,7 @@ class ProfileViewModel @Inject constructor(
             _stateFlow.emit(State.Loading)
             try {
                 val favoriteCoffeeShopIds =
-                    userRepository.getFirestoreUser().favoriteCoffeeShop.take(10)
+                    userRepository.getFirestoreUser().favoriteCoffeeShop.take(FAVORITE_COFFEE_SHOP_ITEM_COUNT)
                 Timber.d("favoriteCoffeeShopIds $favoriteCoffeeShopIds")
                 val favoriteCoffeeShops =
                     coffeeShopRepository.getCoffeeShopsByIds(favoriteCoffeeShopIds)

@@ -132,9 +132,12 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding, ProfileViewModel>()
         delegateManager.addDelegate(loadingAdapterDelegate())
         delegateManager.addDelegate(errorAdapterDelegate { viewModel.loadFavoriteCoffeeShop() })
         delegateManager.addDelegate(emptyAdapterDelegate())
+        binding.recyclerView.setItemViewCacheSize(20)
         val snapHelper = LinearSnapHelper()
         snapHelper.attachToRecyclerView(binding.recyclerView)
         adapter = ListDelegationAdapter(delegateManager)
         binding.recyclerView.adapter = adapter
     }
+
+
 }

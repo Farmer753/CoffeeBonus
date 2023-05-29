@@ -1,6 +1,5 @@
 package ru.ll.coffeebonus.ui
 
-//import ru.ll.coffeebonus.di.ViewModelFactory
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
