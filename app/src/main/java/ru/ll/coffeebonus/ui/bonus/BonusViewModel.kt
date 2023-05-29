@@ -71,6 +71,7 @@ class BonusViewModel @AssistedInject constructor(
 //                    throw IllegalStateException("рандомная ошибка")
 //                }
                 val firestoreCoffeeShop = coffeeShopRepository.getByYandexId(coffeeShop.id)
+                _bonusCoffeeStateFlow.emit(firestoreCoffeeShop?.coffeeBonus)
                 if (firestoreCoffeeShop == null) {
                     Timber.d("нет кофешопа")
                 } else {
@@ -95,7 +96,7 @@ class BonusViewModel @AssistedInject constructor(
                         }
                     }
                 }
-                _bonusCoffeeStateFlow.emit(firestoreCoffeeShop?.coffeeBonus)
+
             } catch (t: Throwable) {
                 Timber.e(t, "ошибка")
                 _errorStateFlow.emit(t.message ?: "Неизвестная ошибка")

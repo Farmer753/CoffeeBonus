@@ -107,7 +107,6 @@ class BonusFragment : BaseFragment<FragmentBonusBinding, BonusViewModel>() {
             viewModel.countCoffeeStateFlow
                 .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
                 .collect { count ->
-                    Timber.d("count collect $count")
                     (0 until count).forEach {
                         (binding.flexBox[it] as ImageView).setColorFilter(
                             ContextCompat.getColor(requireContext(), R.color.ic_launcher_background)
