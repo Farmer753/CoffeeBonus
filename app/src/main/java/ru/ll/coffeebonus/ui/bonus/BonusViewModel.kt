@@ -12,8 +12,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import ru.ll.coffeebonus.domain.CoffeeShop
 import ru.ll.coffeebonus.domain.SessionRepository
-import ru.ll.coffeebonus.domain.bonus.FirestoreBonus
+import ru.ll.coffeebonus.domain.bonus.CoffeeBonusRepository
 import ru.ll.coffeebonus.domain.coffeeshop.CoffeeShopRepository
+import ru.ll.coffeebonus.domain.coffeeshop.FirestoreCoffeeShop
 import ru.ll.coffeebonus.domain.user.UserBonusPrograms
 import ru.ll.coffeebonus.domain.user.UserRepository
 import ru.ll.coffeebonus.ui.BaseViewModel
@@ -23,7 +24,8 @@ class BonusViewModel @AssistedInject constructor(
     @Assisted("coffeeShop") val coffeeShop: CoffeeShop,
     val sessionRepository: SessionRepository,
     val coffeeShopRepository: CoffeeShopRepository,
-    val userRepository: UserRepository
+    val userRepository: UserRepository,
+    val coffeeBonusRepository: CoffeeBonusRepository
 ) : BaseViewModel() {
     @Suppress("UNCHECKED_CAST")
     companion object {
@@ -50,8 +52,8 @@ class BonusViewModel @AssistedInject constructor(
     private val _errorStateFlow = MutableStateFlow<String?>(null)
     val errorStateFlow = _errorStateFlow.asStateFlow()
 
-    private val _bonusCoffeeStateFlow = MutableStateFlow<FirestoreBonus?>(null)
-    val bonusCoffeeStateFlow = _bonusCoffeeStateFlow.asStateFlow()
+    private val _coffeeShopStateFlow = MutableStateFlow<FirestoreCoffeeShop?>(null)
+    val coffeeShopStateFlow = _coffeeShopStateFlow.asStateFlow()
 
     private val _countCoffeeStateFlow = MutableStateFlow<Int>(0)
     val countCoffeeStateFlow = _countCoffeeStateFlow.asStateFlow()
@@ -71,7 +73,7 @@ class BonusViewModel @AssistedInject constructor(
 //                    throw IllegalStateException("рандомная ошибка")
 //                }
                 val firestoreCoffeeShop = coffeeShopRepository.getByYandexId(coffeeShop.id)
-                _bonusCoffeeStateFlow.emit(firestoreCoffeeShop?.coffeeBonus)
+                _coffeeShopStateFlow.emit(firestoreCoffeeShop)
                 if (firestoreCoffeeShop == null) {
                     Timber.d("нет кофешопа")
                 } else {
@@ -104,6 +106,31 @@ class BonusViewModel @AssistedInject constructor(
                 _loadingStateFlow.emit(false)
             }
 
+        }
+    }
+
+    fun addCoffeeButtonClick() {
+//        TODO("Not yet implemented")
+    }
+
+    fun deleteCoffeeBonusButtonClick() {
+//        TODO("Not yet implemented")
+    }
+
+    fun editCoffeeBonusButtonClick() {
+//        TODO("Not yet implemented")
+    }
+
+    fun deleteBonus() {
+        viewModelScope.launch {
+            try {
+//                TODO показать, скрыть прогресс поверх всех 4 кнопок
+                coffeeBonusRepository.delete(_coffeeShopStateFlow.value!!.firestoreId)
+//                TODO подумать, можно ли легко удалить выпитые всеми юзерами чашки кофе в этой кофейне
+            } catch (t: Throwable) {
+                Timber.e(t, "ошибка")
+//                TODO показать юзеру ошибку
+            }
         }
     }
 //    Заинжектить coffeeShop

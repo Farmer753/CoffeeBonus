@@ -15,4 +15,5 @@
     <string name="add">Добавить</string>
     <string name="delete">Удалить</string>
     <string name="edit">Редактировать</string>
+    <string name="clear">Очистить</string>
 </resources>

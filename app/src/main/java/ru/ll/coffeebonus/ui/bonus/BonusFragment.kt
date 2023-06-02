@@ -16,6 +16,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.ll.coffeebonus.R
 import ru.ll.coffeebonus.databinding.FragmentBonusBinding
@@ -43,19 +44,11 @@ class BonusFragment : BaseFragment<FragmentBonusBinding, BonusViewModel>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Timber.d("FragmentBonusBinding")
-        binding.addBonusButton.setOnClickListener {
-            binding.addBonusButton.visibility = GONE
-            binding.bonusInputLayout.visibility = VISIBLE
-            binding.sendMaterialButton.visibility = VISIBLE
-        }
         binding.buttonRetry.setOnClickListener { viewModel.loadInitialData() }
+        binding.deleteCoffeeButton.setOnClickListener { viewModel.deleteBonus() }
 
-        binding.addCoffeeButton.setOnClickListener {
-            (binding.flexBox[0] as ImageView).setColorFilter(
-                ContextCompat.getColor(requireContext(), R.color.ic_launcher_background)
-            )
-        }
+        initNotBonusLayout()
+        initBonusLayout()
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.loadingStateFlow
                 .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
@@ -81,15 +74,18 @@ class BonusFragment : BaseFragment<FragmentBonusBinding, BonusViewModel>() {
                 }
         }
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.bonusCoffeeStateFlow
+            viewModel.coffeeShopStateFlow
+                .map { it?.coffeeBonus }
                 .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
                 .collect {
                     if (it == null) {
                         binding.notBonusConstraintLayout.visibility = VISIBLE
-                        binding.bonusConstraintLayout.visibility = GONE
+                        binding.bonusCoffeeActionView.visibility = GONE
+                        binding.coffeeActionView.visibility = GONE
                     } else {
                         binding.notBonusConstraintLayout.visibility = GONE
-                        binding.bonusConstraintLayout.visibility = VISIBLE
+                        binding.bonusCoffeeActionView.visibility = VISIBLE
+                        binding.coffeeActionView.visibility = VISIBLE
                         binding.flexBox.removeAllViews()
                         (0 until it.bonusQuantity).forEach {
                             val imageView = ImageView(requireContext())
@@ -113,6 +109,22 @@ class BonusFragment : BaseFragment<FragmentBonusBinding, BonusViewModel>() {
                         )
                     }
                 }
+        }
+    }
+
+    private fun initBonusLayout() {
+        binding.addCoffeeButton.setOnClickListener {
+            viewModel.addCoffeeButtonClick()
+        }
+        binding.deleteCoffeeBonusButton.setOnClickListener { viewModel.deleteCoffeeBonusButtonClick() }
+        binding.editCoffeeBonusButton.setOnClickListener { viewModel.editCoffeeBonusButtonClick() }
+    }
+
+    private fun initNotBonusLayout() {
+        binding.addBonusButton.setOnClickListener {
+            binding.addBonusButton.visibility = GONE
+            binding.bonusInputLayout.visibility = VISIBLE
+            binding.sendMaterialButton.visibility = VISIBLE
         }
     }
 }
