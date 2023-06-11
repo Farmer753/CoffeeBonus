@@ -49,6 +49,9 @@ class BonusViewModel @AssistedInject constructor(
     private val _loadingStateFlow = MutableStateFlow<Boolean>(false)
     val loadingStateFlow = _loadingStateFlow.asStateFlow()
 
+    private val _loadingButtonStateFlow = MutableStateFlow<Boolean>(false)
+    val loadingButtonStateFlow = _loadingButtonStateFlow.asStateFlow()
+
     private val _errorStateFlow = MutableStateFlow<String?>(null)
     val errorStateFlow = _errorStateFlow.asStateFlow()
 
@@ -124,12 +127,14 @@ class BonusViewModel @AssistedInject constructor(
     fun deleteBonus() {
         viewModelScope.launch {
             try {
-//                TODO показать, скрыть прогресс поверх всех 4 кнопок
+               _loadingButtonStateFlow.emit(true)
                 coffeeBonusRepository.delete(_coffeeShopStateFlow.value!!.firestoreId)
 //                TODO подумать, можно ли легко удалить выпитые всеми юзерами чашки кофе в этой кофейне
             } catch (t: Throwable) {
                 Timber.e(t, "ошибка")
 //                TODO показать юзеру ошибку
+            } finally {
+                _loadingButtonStateFlow.emit(false)
             }
         }
     }

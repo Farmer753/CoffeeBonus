@@ -80,12 +80,10 @@ class BonusFragment : BaseFragment<FragmentBonusBinding, BonusViewModel>() {
                 .collect {
                     if (it == null) {
                         binding.notBonusConstraintLayout.visibility = VISIBLE
-                        binding.bonusCoffeeActionView.visibility = GONE
-                        binding.coffeeActionView.visibility = GONE
+                        binding.bonusConstraintLayout.visibility = GONE
                     } else {
                         binding.notBonusConstraintLayout.visibility = GONE
-                        binding.bonusCoffeeActionView.visibility = VISIBLE
-                        binding.coffeeActionView.visibility = VISIBLE
+                        binding.bonusConstraintLayout.visibility = VISIBLE
                         binding.flexBox.removeAllViews()
                         (0 until it.bonusQuantity).forEach {
                             val imageView = ImageView(requireContext())
@@ -107,6 +105,17 @@ class BonusFragment : BaseFragment<FragmentBonusBinding, BonusViewModel>() {
                         (binding.flexBox[it] as ImageView).setColorFilter(
                             ContextCompat.getColor(requireContext(), R.color.ic_launcher_background)
                         )
+                    }
+                }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.loadingButtonStateFlow
+                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .collect {
+                    if (it) {
+                        binding.buttonsProgressView.visibility = VISIBLE
+                    } else {
+                        binding.buttonsProgressView.visibility = GONE
                     }
                 }
         }
