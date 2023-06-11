@@ -45,10 +45,10 @@ class BonusFragment : BaseFragment<FragmentBonusBinding, BonusViewModel>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.buttonRetry.setOnClickListener { viewModel.loadInitialData() }
-        binding.deleteCoffeeButton.setOnClickListener { viewModel.deleteBonus() }
 
         initNotBonusLayout()
         initBonusLayout()
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.loadingStateFlow
                 .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
@@ -127,6 +127,7 @@ class BonusFragment : BaseFragment<FragmentBonusBinding, BonusViewModel>() {
         }
         binding.deleteCoffeeBonusButton.setOnClickListener { viewModel.deleteCoffeeBonusButtonClick() }
         binding.editCoffeeBonusButton.setOnClickListener { viewModel.editCoffeeBonusButtonClick() }
+        binding.deleteCoffeeButton.setOnClickListener { viewModel.deleteBonus() }
     }
 
     private fun initNotBonusLayout() {

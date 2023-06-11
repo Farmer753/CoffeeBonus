@@ -1,5 +1,7 @@
 package ru.ll.coffeebonus.domain.coffeeshop
 
+import kotlinx.coroutines.flow.Flow
+
 interface CoffeeShopRepository {
     suspend fun save(firestoreCoffeeShop: FirestoreCoffeeShop)
     suspend fun exists(id: String): Boolean
@@ -7,4 +9,5 @@ interface CoffeeShopRepository {
     suspend fun getByYandexId(yandexId: String): FirestoreCoffeeShop?
     suspend fun getByYandexId(yandexIds: List<String>): List<FirestoreCoffeeShop>
     suspend fun getCoffeeShopsByIds(listId: List<String>): List<FirestoreCoffeeShop>
+    fun getByYandexIdFlow(yandexId: String): Flow<FirestoreCoffeeShop?>
 }

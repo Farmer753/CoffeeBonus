@@ -63,6 +63,12 @@ class BonusViewModel @AssistedInject constructor(
 
     init {
         loadInitialData()
+        viewModelScope.launch {
+            coffeeShopRepository.getByYandexIdFlow(coffeeShop.id).collect {
+                Timber.d("Firestore CoffeeShop $it")
+                _coffeeShopStateFlow.emit(it)
+            }
+        }
     }
 
     fun loadInitialData() {
@@ -75,6 +81,7 @@ class BonusViewModel @AssistedInject constructor(
 //                if (Random.nextBoolean()) {
 //                    throw IllegalStateException("рандомная ошибка")
 //                }
+//                TODO удалить следующую строчку и подумать перенести ли весь код ниже в источник данных кофейни
                 val firestoreCoffeeShop = coffeeShopRepository.getByYandexId(coffeeShop.id)
                 _coffeeShopStateFlow.emit(firestoreCoffeeShop)
                 if (firestoreCoffeeShop == null) {
@@ -127,7 +134,7 @@ class BonusViewModel @AssistedInject constructor(
     fun deleteBonus() {
         viewModelScope.launch {
             try {
-               _loadingButtonStateFlow.emit(true)
+                _loadingButtonStateFlow.emit(true)
                 coffeeBonusRepository.delete(_coffeeShopStateFlow.value!!.firestoreId)
 //                TODO подумать, можно ли легко удалить выпитые всеми юзерами чашки кофе в этой кофейне
             } catch (t: Throwable) {

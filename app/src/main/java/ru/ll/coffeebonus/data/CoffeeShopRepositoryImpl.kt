@@ -1,9 +1,12 @@
 package ru.ll.coffeebonus.data
 
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import ru.ll.coffeebonus.domain.coffeeshop.CoffeeShopRepository
 import ru.ll.coffeebonus.domain.coffeeshop.FirestoreCoffeeShop
+import ru.ll.coffeebonus.ui.util.snapshotFlow
 
 class CoffeeShopRepositoryImpl(
     private val bd: FirebaseFirestore
@@ -53,6 +56,14 @@ class CoffeeShopRepositoryImpl(
         }
         return bd.collection(COLLECTION_COFFEE_SHOPS).whereIn(FIELD_FIRESTORE_ID, listId)
             .get().await().toObjects(FirestoreCoffeeShop::class.java)
+    }
+
+    override fun getByYandexIdFlow(yandexId: String): Flow<FirestoreCoffeeShop?> {
+        return bd.collection(COLLECTION_COFFEE_SHOPS).whereEqualTo(FIELD_YANDEX_ID, yandexId)
+            .snapshotFlow()
+            .map {
+                it.toObjects(FirestoreCoffeeShop::class.java).firstOrNull()
+            }
     }
 
 }
