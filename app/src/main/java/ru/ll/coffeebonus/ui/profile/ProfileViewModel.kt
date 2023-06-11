@@ -47,7 +47,7 @@ class ProfileViewModel @Inject constructor(
     sealed class State {
         object Loading : State()
         data class Error(val message: String) : State()
-        data class Success(val data: List<CoffeeShopUiItem>, val coffeeShopAll: Boolean) : State()
+        data class Success(val data: List<CoffeeShopUiItem>, val coffeeShopMoreThanTen: Boolean) : State()
         object Empty : State()
     }
 

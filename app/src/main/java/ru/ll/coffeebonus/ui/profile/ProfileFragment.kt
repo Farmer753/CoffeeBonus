@@ -118,6 +118,9 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding, ProfileViewModel>()
                             adapter.items = listOf(LoadingUiItem)
                         }
                         is ProfileViewModel.State.Success -> {
+                            if (it.coffeeShopMoreThanTen){
+                                adapter.items = listOf(ShowAllUiItem)
+                            }
 //                            TODO добавить переменную boolean в data класс Success, она try, если избранных кофеен больше 10
 //                            после последней кофейни добавить еще один item с карточкой "посмотреть все" и по нажатию навигироваться на новый экран с вертикальным списком с пагинацией
                             adapter.items = it.data
@@ -138,6 +141,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding, ProfileViewModel>()
         delegateManager.addDelegate(loadingAdapterDelegate())
         delegateManager.addDelegate(errorAdapterDelegate { viewModel.loadFavoriteCoffeeShop() })
         delegateManager.addDelegate(emptyAdapterDelegate())
+        delegateManager.addDelegate(showAllAdapterDelegate())
         val snapHelper = LinearSnapHelper()
         snapHelper.attachToRecyclerView(binding.recyclerView)
         adapter = ListDelegationAdapter(delegateManager)

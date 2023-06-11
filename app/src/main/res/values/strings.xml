@@ -9,4 +9,5 @@
     <string name="need_authorisation">Необходима авторизация</string>
     <string name="empty_list">Здесь будут избранные кофейни</string>
     <string name="coffeeShopAll">Показать все кофейни</string>
+    <string name="show_all">Посмотреть все</string>
 </resources>
