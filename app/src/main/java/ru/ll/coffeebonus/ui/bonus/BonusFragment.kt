@@ -125,9 +125,9 @@ class BonusFragment : BaseFragment<FragmentBonusBinding, BonusViewModel>() {
         binding.addCoffeeButton.setOnClickListener {
             viewModel.addCoffeeButtonClick()
         }
-        binding.deleteCoffeeBonusButton.setOnClickListener { viewModel.deleteCoffeeBonusButtonClick() }
+        binding.clearCoffeeButton.setOnClickListener { viewModel.clearCoffeeBonusButtonClick() }
         binding.editCoffeeBonusButton.setOnClickListener { viewModel.editCoffeeBonusButtonClick() }
-        binding.deleteCoffeeButton.setOnClickListener { viewModel.deleteBonus() }
+        binding.deleteCoffeeBonusButton.setOnClickListener { viewModel.deleteBonusButtonClick() }
     }
 
     private fun initNotBonusLayout() {

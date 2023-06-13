@@ -123,7 +123,7 @@ class BonusViewModel @AssistedInject constructor(
 //        TODO("Not yet implemented")
     }
 
-    fun deleteCoffeeBonusButtonClick() {
+    fun clearCoffeeBonusButtonClick() {
 //        TODO("Not yet implemented")
     }
 
@@ -131,7 +131,7 @@ class BonusViewModel @AssistedInject constructor(
 //        TODO("Not yet implemented")
     }
 
-    fun deleteBonus() {
+    fun deleteBonusButtonClick() {
         viewModelScope.launch {
             try {
                 _loadingButtonStateFlow.emit(true)

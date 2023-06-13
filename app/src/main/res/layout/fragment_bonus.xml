@@ -155,7 +155,7 @@
                     android:text="@string/add" />
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/deleteCoffeeButton"
+                    android:id="@+id/clearCoffeeButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/clear" />
