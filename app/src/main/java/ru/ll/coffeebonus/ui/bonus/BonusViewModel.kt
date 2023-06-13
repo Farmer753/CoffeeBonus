@@ -9,6 +9,7 @@ import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import ru.ll.coffeebonus.domain.CoffeeShop
 import ru.ll.coffeebonus.domain.SessionRepository
@@ -69,6 +70,19 @@ class BonusViewModel @AssistedInject constructor(
                 _coffeeShopStateFlow.emit(it)
             }
         }
+        viewModelScope.launch {
+            userRepository.getFirestoreUserFlow().collect {
+                Timber.d("getFirestoreUserFlow $it")
+            }
+        }
+        viewModelScope.launch {
+            userRepository.getFirestoreUserFlow()
+                .combine(coffeeShopRepository.getByYandexIdFlow(coffeeShop.id)) { user, coffeeShop ->
+                    user to coffeeShop
+                }.collect { (user, coffeeShop) ->
+                    Timber.d("combine $user $coffeeShop")
+                }
+        }
     }
 
     fun loadInitialData() {
@@ -81,7 +95,7 @@ class BonusViewModel @AssistedInject constructor(
 //                if (Random.nextBoolean()) {
 //                    throw IllegalStateException("рандомная ошибка")
 //                }
-//                TODO удалить следующую строчку и подумать перенести ли весь код ниже в источник данных кофейни
+//                TODO удалить следующую строчку и подумать перенести ли весь код ниже в источник данных кофейни и юзера
                 val firestoreCoffeeShop = coffeeShopRepository.getByYandexId(coffeeShop.id)
                 _coffeeShopStateFlow.emit(firestoreCoffeeShop)
                 if (firestoreCoffeeShop == null) {

@@ -3,9 +3,13 @@ package ru.ll.coffeebonus.data
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
+import ru.ll.coffeebonus.domain.coffeeshop.FirestoreCoffeeShop
 import ru.ll.coffeebonus.domain.user.FirestoreUser
 import ru.ll.coffeebonus.domain.user.UserRepository
+import ru.ll.coffeebonus.ui.util.snapshotFlow
 import timber.log.Timber
 
 class UserRepositoryImpl(
@@ -63,5 +67,13 @@ class UserRepositoryImpl(
         bd.collection(COLLECTION_USERS).document(getAuthorizedUser().id)
             .update(FIELD_FAVORITE_COFFEE_SHOP, FieldValue.arrayRemove(coffeeShopFirestoreId))
             .await()
+    }
+
+    override fun getFirestoreUserFlow(): Flow<FirestoreUser> {
+        return bd.collection(COLLECTION_USERS).document(getAuthorizedUser().id)
+            .snapshotFlow()
+            .map {
+                it.toObject(FirestoreUser::class.java)!!
+            }
     }
 }
