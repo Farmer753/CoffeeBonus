@@ -2,15 +2,16 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
-    android:gravity="center">
+    android:gravity="center"
+    android:background="@color/green">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/showAllTextView"
-        tools:text="@string/show_all"
+        android:id="@+id/coffeeShopMoreThanTenTextView"
+        android:background="?selectableItemBackground"
+        android:text="@string/show_all"
         android:gravity="center"
         android:textSize="25sp"
         android:padding="16dp"/>

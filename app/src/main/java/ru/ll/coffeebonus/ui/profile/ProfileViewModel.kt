@@ -15,6 +15,7 @@ import ru.ll.coffeebonus.domain.coffeeshop.ModelConverter
 import ru.ll.coffeebonus.domain.user.FirestoreUser
 import ru.ll.coffeebonus.domain.user.UserRepository
 import ru.ll.coffeebonus.ui.BaseViewModel
+import ru.ll.coffeebonus.ui.adapter.AdapterItem
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -47,7 +48,7 @@ class ProfileViewModel @Inject constructor(
     sealed class State {
         object Loading : State()
         data class Error(val message: String) : State()
-        data class Success(val data: List<CoffeeShopUiItem>, val coffeeShopMoreThanTen: Boolean) : State()
+        data class Success(val data: List<AdapterItem>) : State()
         object Empty : State()
     }
 
@@ -97,10 +98,10 @@ class ProfileViewModel @Inject constructor(
                 if (favoriteCoffeeShops.isEmpty()) {
                     _stateFlow.emit(State.Empty)
                 } else {
-                    if (favoriteCoffeeShops.size > 10) {
-                        _stateFlow.emit(State.Success(favoriteCoffeeShops, true))
+                    if (favoriteCoffeeShops.size == 10) {
+                        _stateFlow.emit(State.Success(favoriteCoffeeShops + CoffeeShopMoreThanTenUiItem))
                     } else {
-                        _stateFlow.emit(State.Success(favoriteCoffeeShops, false))
+                        _stateFlow.emit(State.Success(favoriteCoffeeShops))
                     }
                     Timber.d("favoriteCoffeeShops $favoriteCoffeeShops")
                 }
@@ -117,7 +118,7 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun onCoffeeShopAllClick() {
+    fun onCoffeeShopMoreThanTenClick() {
         viewModelScope.launch {
             eventChannel.send(Event.NavigateToCoffeeAll)
         }
