@@ -28,7 +28,7 @@
         android:label="CoffeeAll"
         tools:layout="@layout/fragment_coffee_all">
         <action
-            android:id="@+id/action_profile_to_coffee_all"
+            android:id="@+id/action_coffee_all_to_coffee"
             app:destination="@+id/coffeeDialogFragment">
             <argument
                 android:name="ARG_COFFEESHOP"

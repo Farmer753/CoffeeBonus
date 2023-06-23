@@ -12,7 +12,7 @@ fun coffeeShopMoreThanTenAdapterDelegate(clickListener: () -> Unit) =
     {
         bind {
             with(binding) {
-//                coffeeShopMoreThanTenTextView.setOnClickListener { clickListener() }
+                coffeeShopMoreThanTenTextView.setOnClickListener { clickListener() }
             }
         }
     }

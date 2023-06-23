@@ -48,5 +48,31 @@
         tools:itemCount="10"
         tools:ignore="MissingConstraints" />
 
+    <LinearLayout
+        android:id="@+id/errorView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/whiteHalfTransparent"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar">
+
+        <TextView
+            android:id="@+id/errorTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            tools:text="Текст ошибки" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonRetry"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:text="@string/retry"
+            android:visibility="visible" />
+    </LinearLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
