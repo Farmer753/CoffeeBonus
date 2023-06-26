@@ -132,7 +132,6 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding, ProfileViewModel>()
     private fun initRecyclerView() {
         val delegateManager = AdapterDelegatesManager<List<AdapterItem>>()
         delegateManager.addDelegate(coffeeShopAdapterDelegate { viewModel.onCoffeeShopClick(it) })
-//        delegateManager.addDelegate(coffeeShopAllAdapterDelegate { viewModel.onCoffeeShopAllClick() })
         delegateManager.addDelegate(loadingAdapterDelegate())
         delegateManager.addDelegate(errorAdapterDelegate { viewModel.loadFavoriteCoffeeShop() })
         delegateManager.addDelegate(emptyAdapterDelegate())
