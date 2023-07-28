@@ -46,6 +46,7 @@ class CoffeeFragment : BaseFragment<FragmentCoffeeBinding, CoffeeViewModel>() {
 
     @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        retainInstance=true
         super.onViewCreated(view, savedInstanceState)
         if (childFragmentManager.fragments.isEmpty()) {
             val bonusFragment = BonusFragment()
@@ -75,13 +76,11 @@ class CoffeeFragment : BaseFragment<FragmentCoffeeBinding, CoffeeViewModel>() {
                             )
                             snackbar.setAction(R.string.login) { viewModel.onLoginClick() }
                             snackbar.show()
-
                         }
                         is CoffeeViewModel.Event.NavigationToLogin -> {
                             findNavController().navigate(
                                 R.id.action_coffee_to_login,
                                 bundleOf(ARG_OPEN_PROFILE to false)
-
                             )
                         }
                         is CoffeeViewModel.Event.ShowMessage -> showMessage(event.message)
@@ -148,4 +147,5 @@ class CoffeeFragment : BaseFragment<FragmentCoffeeBinding, CoffeeViewModel>() {
                 }
         }
     }
+
 }

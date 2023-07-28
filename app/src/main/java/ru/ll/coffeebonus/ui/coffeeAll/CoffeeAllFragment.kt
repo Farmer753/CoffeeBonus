@@ -1,4 +1,4 @@
-package ru.ll.coffeebonus.ui.profile
+package ru.ll.coffeebonus.ui.coffeeAll
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -11,26 +11,25 @@ import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearSnapHelper
-import coil.load
 import com.hannesdorfmann.adapterdelegates4.AdapterDelegatesManager
 import com.hannesdorfmann.adapterdelegates4.ListDelegationAdapter
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import ru.ll.coffeebonus.R
-import ru.ll.coffeebonus.databinding.FragmentProfileBinding
+import ru.ll.coffeebonus.databinding.FragmentCoffeeAllBinding
 import ru.ll.coffeebonus.ui.BaseFragment
 import ru.ll.coffeebonus.ui.adapter.AdapterItem
 import ru.ll.coffeebonus.ui.coffee.CoffeeFragment
+import ru.ll.coffeebonus.ui.profile.*
 import timber.log.Timber
 
 @AndroidEntryPoint
-class ProfileFragment : BaseFragment<FragmentProfileBinding, ProfileViewModel>() {
+class CoffeeAllFragment : BaseFragment<FragmentCoffeeAllBinding, CoffeeAllViewModel>() {
 
-    override val viewModel: ProfileViewModel by viewModels()
+    override val viewModel: CoffeeAllViewModel by viewModels()
 
-    override val bindingInflater: (LayoutInflater, ViewGroup?, Boolean) -> FragmentProfileBinding =
-        FragmentProfileBinding::inflate
+    override val bindingInflater: (LayoutInflater, ViewGroup?, Boolean) -> FragmentCoffeeAllBinding =
+        FragmentCoffeeAllBinding::inflate
 
     private lateinit var adapter: ListDelegationAdapter<List<AdapterItem>>
 
@@ -39,8 +38,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding, ProfileViewModel>()
         binding.toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
         }
-        binding.buttonRetry.setOnClickListener { viewModel.loadUser() }
-        binding.buttonLogout.setOnClickListener { viewModel.logout() }
+        binding.buttonRetry.setOnClickListener { viewModel.loadFavoriteCoffeeShop() }
 
         initRecyclerView()
 
@@ -49,34 +47,18 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding, ProfileViewModel>()
                 .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
                 .collect { event ->
                     when (event) {
-                        is ProfileViewModel.Event.CloseScreen -> {
+                        is CoffeeAllViewModel.Event.CloseScreen -> {
                             findNavController().popBackStack()
                         }
-                        is ProfileViewModel.Event.NavigateToCoffee -> {
+                        is CoffeeAllViewModel.Event.NavigateToCoffee -> {
                             findNavController().navigate(
-                                R.id.action_profile_to_coffee,
+                                R.id.action_coffee_all_to_coffee,
                                 bundleOf(
                                     CoffeeFragment.ARG_COFFEESHOP to event.coffeeShop
                                 )
                             )
                         }
-                        is ProfileViewModel.Event.NavigateToCoffeeAll -> {
-                            findNavController().navigate(
-                                R.id.action_profile_to_coffeeAll
-                            )
-                        }
                     }
-                }
-        }
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.userStateFlow
-                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
-                .filterNotNull()
-                .collect {
-                    Timber.d("юзер $it")
-                    binding.nameTextView.text = it.name
-                    binding.emailTextView.text = it.email
-                    binding.iconImageView.load(it.avatarUrl)
                 }
         }
         viewLifecycleOwner.lifecycleScope.launch {
@@ -104,24 +86,20 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding, ProfileViewModel>()
                     binding.errorTextView.text = it
                 }
         }
-
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.stateFlow
                 .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
                 .collect {
                     Timber.d("state $it")
                     when (it) {
-                        is ProfileViewModel.State.Error -> {
+                        is CoffeeAllViewModel.State.Error -> {
                             adapter.items = listOf(ErrorUiItem(it.message))
                         }
-                        is ProfileViewModel.State.Loading -> {
+                        is CoffeeAllViewModel.State.Loading -> {
                             adapter.items = listOf(LoadingUiItem)
                         }
-                        is ProfileViewModel.State.Success -> {
+                        is CoffeeAllViewModel.State.Success -> {
                             adapter.items = it.data
-                        }
-                        is ProfileViewModel.State.Empty -> {
-                            adapter.items = listOf(EmptyUiItem)
                         }
                     }
                     adapter.notifyDataSetChanged()
@@ -134,13 +112,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding, ProfileViewModel>()
         delegateManager.addDelegate(coffeeShopAdapterDelegate { viewModel.onCoffeeShopClick(it) })
         delegateManager.addDelegate(loadingAdapterDelegate())
         delegateManager.addDelegate(errorAdapterDelegate { viewModel.loadFavoriteCoffeeShop() })
-        delegateManager.addDelegate(emptyAdapterDelegate())
-        binding.recyclerView.setItemViewCacheSize(20)
-        delegateManager.addDelegate(coffeeShopMoreThanTenAdapterDelegate {
-            viewModel.onCoffeeShopMoreThanTenClick()
-        })
-        val snapHelper = LinearSnapHelper()
-        snapHelper.attachToRecyclerView(binding.recyclerView)
+
         adapter = ListDelegationAdapter(delegateManager)
         binding.recyclerView.adapter = adapter
     }
