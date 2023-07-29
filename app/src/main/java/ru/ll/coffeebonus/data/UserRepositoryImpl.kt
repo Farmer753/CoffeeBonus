@@ -6,8 +6,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
-import ru.ll.coffeebonus.domain.coffeeshop.FirestoreCoffeeShop
 import ru.ll.coffeebonus.domain.user.FirestoreUser
+import ru.ll.coffeebonus.domain.user.UserBonusPrograms
 import ru.ll.coffeebonus.domain.user.UserRepository
 import ru.ll.coffeebonus.ui.util.snapshotFlow
 import timber.log.Timber
@@ -21,6 +21,7 @@ class UserRepositoryImpl(
         const val COLLECTION_USERS = "users"
         const val FIELD_ID = "id"
         const val FIELD_FAVORITE_COFFEE_SHOP = "favoriteCoffeeShop"
+        const val BONUS_PROGRAMS = "bonusPrograms"
     }
 
     override suspend fun saveUser(firestoreUser: FirestoreUser) {
@@ -66,6 +67,17 @@ class UserRepositoryImpl(
     override suspend fun removeCoffeeFavorite(coffeeShopFirestoreId: String) {
         bd.collection(COLLECTION_USERS).document(getAuthorizedUser().id)
             .update(FIELD_FAVORITE_COFFEE_SHOP, FieldValue.arrayRemove(coffeeShopFirestoreId))
+            .await()
+    }
+
+    override suspend fun upsertUserBonusProgram(firestoreId: String, newCount: Int, initialCount:Int) {
+        bd.collection(COLLECTION_USERS).document(getAuthorizedUser().id)
+            .update(BONUS_PROGRAMS,
+                FieldValue.arrayRemove(UserBonusPrograms(firestoreId, initialCount)))
+            .await()
+        bd.collection(COLLECTION_USERS).document(getAuthorizedUser().id)
+            .update(BONUS_PROGRAMS,
+                FieldValue.arrayUnion(UserBonusPrograms(firestoreId, newCount)))
             .await()
     }
 

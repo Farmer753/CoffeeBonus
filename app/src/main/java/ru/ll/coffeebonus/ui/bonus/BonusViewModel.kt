@@ -63,7 +63,7 @@ class BonusViewModel @AssistedInject constructor(
     val countCoffeeStateFlow = _countCoffeeStateFlow.asStateFlow()
 
     init {
-        loadInitialData()
+//        loadInitialData()
         viewModelScope.launch {
             coffeeShopRepository.getByYandexIdFlow(coffeeShop.id).collect {
                 Timber.d("Firestore CoffeeShop $it")
@@ -81,6 +81,12 @@ class BonusViewModel @AssistedInject constructor(
                     user to coffeeShop
                 }.collect { (user, coffeeShop) ->
                     Timber.d("combine $user $coffeeShop")
+                    _coffeeShopStateFlow.emit(coffeeShop)
+                    _countCoffeeStateFlow.emit(
+                        user.bonusPrograms.find {
+                            it.id == coffeeShop?.firestoreId
+                        }?.count ?: 0
+                    )
                 }
         }
     }
@@ -129,7 +135,6 @@ class BonusViewModel @AssistedInject constructor(
             } finally {
                 _loadingStateFlow.emit(false)
             }
-
         }
     }
 
@@ -138,7 +143,17 @@ class BonusViewModel @AssistedInject constructor(
     }
 
     fun clearCoffeeBonusButtonClick() {
-//        TODO("Not yet implemented")
+        viewModelScope.launch {
+            try {
+                userRepository.upsertUserBonusProgram(
+                    _coffeeShopStateFlow.value!!.firestoreId,
+                    0,
+                    _countCoffeeStateFlow.value
+                )
+            } catch (t: Throwable) {
+                Timber.e(t, "ошибка")
+            }
+        }
     }
 
     fun editCoffeeBonusButtonClick() {

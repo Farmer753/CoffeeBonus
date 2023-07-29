@@ -10,5 +10,6 @@
     <color name="green">#018786</color>
     <color name="whiteHalfTransparent">#80FFFFFF</color>
     <color name="greyHalfTransparent">#20000000</color>
-    <color name="ic_launcher_background">#DC6F3D</color>
+    <color name="accent_color">#DC6F3D</color>
+    <color name="default_color">#FF000000</color>
 </resources>
