@@ -10,6 +10,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.ll.coffeebonus.domain.CoffeeShop
 import ru.ll.coffeebonus.domain.SessionRepository
@@ -63,19 +64,14 @@ class BonusViewModel @AssistedInject constructor(
     val countCoffeeStateFlow = _countCoffeeStateFlow.asStateFlow()
 
     init {
-//        loadInitialData()
         viewModelScope.launch {
-            coffeeShopRepository.getByYandexIdFlow(coffeeShop.id).collect {
-                Timber.d("Firestore CoffeeShop $it")
-                _coffeeShopStateFlow.emit(it)
-            }
-        }
-        viewModelScope.launch {
-            userRepository.getFirestoreUserFlow().collect {
-                Timber.d("getFirestoreUserFlow $it")
-            }
-        }
-        viewModelScope.launch {
+//            sessionRepository.userLogined.map {
+//                if (it){
+//
+//                }else{
+//
+//                }
+//            }
             userRepository.getFirestoreUserFlow()
                 .combine(coffeeShopRepository.getByYandexIdFlow(coffeeShop.id)) { user, coffeeShop ->
                     user to coffeeShop
@@ -83,7 +79,7 @@ class BonusViewModel @AssistedInject constructor(
                     Timber.d("combine $user $coffeeShop")
                     _coffeeShopStateFlow.emit(coffeeShop)
                     _countCoffeeStateFlow.emit(
-                        user.bonusPrograms.find {
+                        user?.bonusPrograms?.find {
                             it.id == coffeeShop?.firestoreId
                         }?.count ?: 0
                     )
@@ -139,7 +135,17 @@ class BonusViewModel @AssistedInject constructor(
     }
 
     fun addCoffeeButtonClick() {
-//        TODO("Not yet implemented")
+        viewModelScope.launch {
+            try {
+                userRepository.upsertUserBonusProgram(
+                    _coffeeShopStateFlow.value!!.firestoreId,
+                    _countCoffeeStateFlow.value + 1,
+                    _countCoffeeStateFlow.value
+                )
+            } catch (t: Throwable) {
+                Timber.e(t, "ошибка")
+            }
+        }
     }
 
     fun clearCoffeeBonusButtonClick() {
