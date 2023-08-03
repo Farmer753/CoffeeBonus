@@ -7,10 +7,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import ru.ll.coffeebonus.domain.CoffeeShop
 import ru.ll.coffeebonus.domain.SessionRepository
@@ -65,14 +62,13 @@ class BonusViewModel @AssistedInject constructor(
 
     init {
         viewModelScope.launch {
-//            sessionRepository.userLogined.map {
-//                if (it){
-//
-//                }else{
-//
-//                }
-//            }
-            userRepository.getFirestoreUserFlow()
+            sessionRepository.userLogined.flatMapConcat {
+                if (it) {
+                    userRepository.getFirestoreUserFlow()
+                } else {
+                    flowOf(null)
+                }
+            }
                 .combine(coffeeShopRepository.getByYandexIdFlow(coffeeShop.id)) { user, coffeeShop ->
                     user to coffeeShop
                 }.collect { (user, coffeeShop) ->

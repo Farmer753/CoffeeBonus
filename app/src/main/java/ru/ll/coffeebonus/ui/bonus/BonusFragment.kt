@@ -107,6 +107,7 @@ class BonusFragment : BaseFragment<FragmentBonusBinding, BonusViewModel>() {
                         )
                     }
                     (0 until count).forEach {
+//                        TODO учесть добавление юзером кол-во стаканчиков кофе, превышающее отображаемые на экране
                         (binding.flexBox[it] as ImageView).setColorFilter(
                             ContextCompat.getColor(requireContext(), R.color.accent_color)
                         )

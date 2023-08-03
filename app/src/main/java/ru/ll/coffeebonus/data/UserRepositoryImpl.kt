@@ -7,10 +7,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import ru.ll.coffeebonus.domain.user.FirestoreUser
+import ru.ll.coffeebonus.domain.user.UserBonusPrograms
 import ru.ll.coffeebonus.domain.user.UserRepository
 import ru.ll.coffeebonus.ui.util.snapshotFlow
 import timber.log.Timber
-import kotlin.random.Random
 
 class UserRepositoryImpl(
     private val firebaseAuth: FirebaseAuth,
@@ -72,31 +72,27 @@ class UserRepositoryImpl(
 
     override suspend fun upsertUserBonusProgram(
         firestoreId: String,
-        newCount: Int,
-        initialCount: Int
+        newCount: Int
     ) {
         val user = bd.collection(COLLECTION_USERS).document(getAuthorizedUser().id).get().await()
-            .toObject(FirestoreUser::class.java)
-        bd.collection(COLLECTION_USERS).document(getAuthorizedUser().id)
-            .set(user!!.copy(name = Random.nextInt().toString()))
+            .toObject(FirestoreUser::class.java)!!
 //        получить все бонусные программы
+        val bonusPrograms = user.bonusPrograms
 //        найти в бонусных программах нужную бонусную программу по айди кофейни, если она есть.
+        val bonus: UserBonusPrograms = bonusPrograms.find {
+            it.id == firestoreId
+        } ?: UserBonusPrograms(id = firestoreId)
 //        если бонусной программы нет - создать новую
 //        если бонусная программа есть - проставить новое количество чашек кофе
+        val bonusToUpdate = UserBonusPrograms(id = firestoreId, count = newCount)
 //        аменить в массиве из первого пункта старую бонусную программу на новую
+        val bonusProgramsToUpdate = bonusPrograms.toMutableList().apply {
+            remove(bonus)
+            add(bonusToUpdate)
+        }
 //        записать полученный обновленный массив в firestore
-//        bd.collection(COLLECTION_USERS).document(getAuthorizedUser().id)
-//            .update(
-//                BONUS_PROGRAMS,
-//                FieldValue.arrayRemove(UserBonusPrograms(firestoreId, initialCount))
-//            )
-//            .await()
-//        bd.collection(COLLECTION_USERS).document(getAuthorizedUser().id)
-//            .update(
-//                BONUS_PROGRAMS,
-//                FieldValue.arrayUnion(UserBonusPrograms(firestoreId, newCount))
-//            )
-//            .await()
+        bd.collection(COLLECTION_USERS).document(getAuthorizedUser().id)
+            .set(user.copy(bonusPrograms = bonusProgramsToUpdate)).await()
     }
 
     override fun getFirestoreUserFlow(): Flow<FirestoreUser?> {
