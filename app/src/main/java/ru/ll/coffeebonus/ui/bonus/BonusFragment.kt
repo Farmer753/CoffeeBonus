@@ -16,6 +16,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.ll.coffeebonus.R
@@ -98,16 +99,32 @@ class BonusFragment : BaseFragment<FragmentBonusBinding, BonusViewModel>() {
                 }
         }
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.countCoffeeStateFlow
+            viewModel.userCoffeeCountStateFlow
+                .combine(viewModel.coffeeShopStateFlow.map {
+                    it?.coffeeBonus?.bonusQuantity ?: 0
+                }) { userCoffeeCount, coffeeShopCoffeeCount ->
+                    userCoffeeCount to coffeeShopCoffeeCount
+                }
                 .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
-                .collect { count ->
+                .collect { (userCoffeeCount, coffeeShopCoffeeCount) ->
                     (0 until binding.flexBox.childCount).forEach {
                         (binding.flexBox[it] as ImageView).setColorFilter(
                             ContextCompat.getColor(requireContext(), R.color.default_color)
                         )
                     }
-                    (0 until count).forEach {
-//                        TODO учесть добавление юзером кол-во стаканчиков кофе, превышающее отображаемые на экране
+                    val freeCoffeeCount = if (coffeeShopCoffeeCount == 0) {
+                        0
+                    } else {
+                        userCoffeeCount / coffeeShopCoffeeCount
+                    }
+                    Timber.d("freeCoffeeCount $freeCoffeeCount")
+                    binding.freeCoffeeTextView.text = getString(R.string.free, freeCoffeeCount)
+                    val currentCoffeeCount = if (coffeeShopCoffeeCount == 0) {
+                        0
+                    } else {
+                        userCoffeeCount % coffeeShopCoffeeCount
+                    }
+                    (0 until currentCoffeeCount).forEach {
                         (binding.flexBox[it] as ImageView).setColorFilter(
                             ContextCompat.getColor(requireContext(), R.color.accent_color)
                         )

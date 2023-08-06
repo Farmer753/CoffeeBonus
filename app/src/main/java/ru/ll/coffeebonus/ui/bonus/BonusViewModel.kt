@@ -57,8 +57,8 @@ class BonusViewModel @AssistedInject constructor(
     private val _coffeeShopStateFlow = MutableStateFlow<FirestoreCoffeeShop?>(null)
     val coffeeShopStateFlow = _coffeeShopStateFlow.asStateFlow()
 
-    private val _countCoffeeStateFlow = MutableStateFlow<Int>(0)
-    val countCoffeeStateFlow = _countCoffeeStateFlow.asStateFlow()
+    private val _userCoffeeCountStateFlow = MutableStateFlow<Int>(0)
+    val userCoffeeCountStateFlow = _userCoffeeCountStateFlow.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -74,7 +74,7 @@ class BonusViewModel @AssistedInject constructor(
                 }.collect { (user, coffeeShop) ->
                     Timber.d("combine $user $coffeeShop")
                     _coffeeShopStateFlow.emit(coffeeShop)
-                    _countCoffeeStateFlow.emit(
+                    _userCoffeeCountStateFlow.emit(
                         user?.bonusPrograms?.find {
                             it.id == coffeeShop?.firestoreId
                         }?.count ?: 0
@@ -113,7 +113,7 @@ class BonusViewModel @AssistedInject constructor(
                                 user.bonusPrograms.find { it.id == firestoreCoffeeShop.firestoreId }
                             if (currentCoffeeShopUserBonusProgram != null) {
                                 delay(1000)
-                                _countCoffeeStateFlow.emit(currentCoffeeShopUserBonusProgram.count)
+                                _userCoffeeCountStateFlow.emit(currentCoffeeShopUserBonusProgram.count)
                             }
                         } else {
                             Timber.d("юзер не авторизован")
@@ -135,8 +135,7 @@ class BonusViewModel @AssistedInject constructor(
             try {
                 userRepository.upsertUserBonusProgram(
                     _coffeeShopStateFlow.value!!.firestoreId,
-                    _countCoffeeStateFlow.value + 1,
-                    _countCoffeeStateFlow.value
+                    _userCoffeeCountStateFlow.value + 1
                 )
             } catch (t: Throwable) {
                 Timber.e(t, "ошибка")
@@ -149,8 +148,7 @@ class BonusViewModel @AssistedInject constructor(
             try {
                 userRepository.upsertUserBonusProgram(
                     _coffeeShopStateFlow.value!!.firestoreId,
-                    0,
-                    _countCoffeeStateFlow.value
+                    0
                 )
             } catch (t: Throwable) {
                 Timber.e(t, "ошибка")
