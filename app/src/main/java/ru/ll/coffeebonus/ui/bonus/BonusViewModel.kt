@@ -12,8 +12,10 @@ import kotlinx.coroutines.launch
 import ru.ll.coffeebonus.domain.CoffeeShop
 import ru.ll.coffeebonus.domain.SessionRepository
 import ru.ll.coffeebonus.domain.bonus.CoffeeBonusRepository
+import ru.ll.coffeebonus.domain.bonus.FirestoreBonus
 import ru.ll.coffeebonus.domain.coffeeshop.CoffeeShopRepository
 import ru.ll.coffeebonus.domain.coffeeshop.FirestoreCoffeeShop
+import ru.ll.coffeebonus.domain.coffeeshop.ModelConverter
 import ru.ll.coffeebonus.domain.user.UserBonusPrograms
 import ru.ll.coffeebonus.domain.user.UserRepository
 import ru.ll.coffeebonus.ui.BaseViewModel
@@ -24,7 +26,8 @@ class BonusViewModel @AssistedInject constructor(
     val sessionRepository: SessionRepository,
     val coffeeShopRepository: CoffeeShopRepository,
     val userRepository: UserRepository,
-    val coffeeBonusRepository: CoffeeBonusRepository
+    val coffeeBonusRepository: CoffeeBonusRepository,
+    val converter: ModelConverter
 ) : BaseViewModel() {
     @Suppress("UNCHECKED_CAST")
     companion object {
@@ -171,6 +174,30 @@ class BonusViewModel @AssistedInject constructor(
 //                TODO показать юзеру ошибку
             } finally {
                 _loadingButtonStateFlow.emit(false)
+            }
+        }
+    }
+
+    fun createBonusProgram(count: Int) {
+        viewModelScope.launch {
+            try {
+//                  TODO: показать лоудер
+                //  получить кофейню по яндекс id
+                val firestoreCoffeeShopFromServer =
+                    coffeeShopRepository.getByYandexId(coffeeShop.id)
+                // если кофейни нет - создать кофейню с помощью конвертера и сделать копию созданной кофейни с бонусной программой внутри и записать ее в базу
+                if (firestoreCoffeeShopFromServer == null) {
+                    coffeeShopRepository.save(
+                        converter.convert(coffeeShop).copy(coffeeBonus = FirestoreBonus(count))
+                    )
+                } else {
+//                    TODO если  кофейня есть - вызвать метод добавления бонусной программы в кофейне
+                }
+            } catch (t: Throwable) {
+//                TODO: показать ошибку
+                Timber.e(t, "ошибка")
+            } finally {
+//                TODO убрать лоудер
             }
         }
     }

@@ -46,7 +46,11 @@ class BonusFragment : BaseFragment<FragmentBonusBinding, BonusViewModel>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.buttonRetry.setOnClickListener { viewModel.loadInitialData() }
-
+        binding.createBonusProgramButton.setOnClickListener {
+            viewModel.createBonusProgram(
+                binding.bonusEditText.text.toString().toInt()
+            )
+        }
         initNotBonusLayout()
         initBonusLayout()
 
@@ -155,7 +159,7 @@ class BonusFragment : BaseFragment<FragmentBonusBinding, BonusViewModel>() {
         binding.addBonusButton.setOnClickListener {
             binding.addBonusButton.visibility = GONE
             binding.bonusInputLayout.visibility = VISIBLE
-            binding.sendMaterialButton.visibility = VISIBLE
+            binding.createBonusProgramButton.visibility = VISIBLE
         }
     }
 }
