@@ -1,6 +1,7 @@
 package ru.ll.coffeebonus.data
 
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Source
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
@@ -45,6 +46,11 @@ class CoffeeShopRepositoryImpl(
         }
         return bd.collection(COLLECTION_COFFEE_SHOPS).whereIn(FIELD_YANDEX_ID, yandexIds)
             .get().await().toObjects(FirestoreCoffeeShop::class.java)
+    }
+
+    override suspend fun getByYandexIdFromServer(yandexId: String): FirestoreCoffeeShop? {
+        return bd.collection(COLLECTION_COFFEE_SHOPS).whereEqualTo(FIELD_YANDEX_ID, yandexId)
+            .get(Source.SERVER).await().firstOrNull()?.toObject(FirestoreCoffeeShop::class.java)
     }
 
     override suspend fun getCoffeeShopsByIds(listId: List<String>): List<FirestoreCoffeeShop> {

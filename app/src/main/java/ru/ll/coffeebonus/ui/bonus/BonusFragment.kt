@@ -46,6 +46,7 @@ class BonusFragment : BaseFragment<FragmentBonusBinding, BonusViewModel>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.buttonRetry.setOnClickListener { viewModel.loadInitialData() }
+        //                TODO скрывать клову по клику на кнопку
         binding.createBonusProgramButton.setOnClickListener {
             viewModel.createBonusProgram(
                 binding.bonusEditText.text.toString().toInt()

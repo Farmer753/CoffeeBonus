@@ -197,6 +197,13 @@ class BonusViewModel @AssistedInject constructor(
                         FirestoreBonus(count)
                     )
                 }
+                val coffeeShopFromServer =
+                    coffeeShopRepository.getByYandexIdFromServer(coffeeShop.id)
+//                TODO не выводит в логи
+                Timber.d("coffeeShopFromServer $coffeeShopFromServer")
+                if (coffeeShopFromServer?.coffeeBonus == null) {
+                    throw IllegalStateException("Не удалось убедиться в создании бонусной программы")
+                }
             } catch (t: Throwable) {
 //                TODO: показать ошибку
                 Timber.e(t, "ошибка")
