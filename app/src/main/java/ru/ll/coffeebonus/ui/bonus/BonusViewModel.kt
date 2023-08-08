@@ -187,11 +187,15 @@ class BonusViewModel @AssistedInject constructor(
                     coffeeShopRepository.getByYandexId(coffeeShop.id)
                 // если кофейни нет - создать кофейню с помощью конвертера и сделать копию созданной кофейни с бонусной программой внутри и записать ее в базу
                 if (firestoreCoffeeShopFromServer == null) {
-                    coffeeShopRepository.save(
+                    coffeeShopRepository.createCoffeeShop(
                         converter.convert(coffeeShop).copy(coffeeBonus = FirestoreBonus(count))
                     )
                 } else {
-//                    TODO если  кофейня есть - вызвать метод добавления бонусной программы в кофейне
+//                    если  кофейня есть - вызвать метод добавления бонусной программы в кофейне
+                    coffeeBonusRepository.saveBonusProgram(
+                        firestoreCoffeeShopFromServer.firestoreId,
+                        FirestoreBonus(count)
+                    )
                 }
             } catch (t: Throwable) {
 //                TODO: показать ошибку

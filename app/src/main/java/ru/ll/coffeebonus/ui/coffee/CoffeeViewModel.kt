@@ -14,14 +14,12 @@ import kotlinx.coroutines.launch
 import ru.ll.coffeebonus.domain.CoffeeShop
 import ru.ll.coffeebonus.domain.SessionRepository
 import ru.ll.coffeebonus.domain.bonus.CoffeeBonusRepository
-import ru.ll.coffeebonus.domain.bonus.FirestoreBonus
 import ru.ll.coffeebonus.domain.coffeeshop.CoffeeShopRepository
 import ru.ll.coffeebonus.domain.coffeeshop.FirestoreCoffeeShop
 import ru.ll.coffeebonus.domain.coffeeshop.ModelConverter
 import ru.ll.coffeebonus.domain.user.UserRepository
 import ru.ll.coffeebonus.ui.BaseViewModel
 import timber.log.Timber
-import kotlin.random.Random
 
 class CoffeeViewModel @AssistedInject constructor(
     @Assisted("coffeeShop") val coffeeShop: CoffeeShop,
@@ -89,7 +87,7 @@ class CoffeeViewModel @AssistedInject constructor(
                     val coffeeShopExist = coffeeShopRepository.exists(coffeeShop.id)
 //                    throw IllegalStateException("ошибка")
                     if (!coffeeShopExist) {
-                        coffeeShopRepository.save(converter.convert(coffeeShop))
+                        coffeeShopRepository.createCoffeeShop(converter.convert(coffeeShop))
                     }
                     val firestoreCoffeeShop = coffeeShopRepository.getByYandexId(coffeeShop.id)!!
                     _firestoreCoffeeShopStateFlow.emit(firestoreCoffeeShop)

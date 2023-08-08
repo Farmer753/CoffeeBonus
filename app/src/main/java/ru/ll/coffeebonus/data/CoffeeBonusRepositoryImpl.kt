@@ -16,7 +16,7 @@ class CoffeeBonusRepositoryImpl(
         const val FIELD_FIRESTORE_ID = "firestoreId"
     }
 
-    override suspend fun save(firestoreId: String, firestoreBonus: FirestoreBonus) {
+    override suspend fun saveBonusProgram(firestoreId: String, firestoreBonus: FirestoreBonus) {
         val documentReference = bd.collection(COLLECTION_COFFEE_SHOPS).document(firestoreId)
         documentReference.update(FIELD_COFFEE_BONUS, firestoreBonus).await()
     }

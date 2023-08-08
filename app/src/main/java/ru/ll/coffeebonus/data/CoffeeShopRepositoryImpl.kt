@@ -18,7 +18,7 @@ class CoffeeShopRepositoryImpl(
         const val FIELD_FIRESTORE_ID = "firestoreId"
     }
 
-    override suspend fun save(firestoreCoffeeShop: FirestoreCoffeeShop) {
+    override suspend fun createCoffeeShop(firestoreCoffeeShop: FirestoreCoffeeShop) {
         val documentReference = bd.collection(COLLECTION_COFFEE_SHOPS).document()
         documentReference.set(firestoreCoffeeShop.apply { firestoreId = documentReference.id })
             .await()
