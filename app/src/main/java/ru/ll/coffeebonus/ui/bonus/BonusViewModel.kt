@@ -20,16 +20,15 @@ import ru.ll.coffeebonus.domain.coffeeshop.ModelConverter
 import ru.ll.coffeebonus.domain.user.UserBonusPrograms
 import ru.ll.coffeebonus.domain.user.UserRepository
 import ru.ll.coffeebonus.ui.BaseViewModel
-import ru.ll.coffeebonus.ui.coffee.CoffeeViewModel
 import timber.log.Timber
 
 class BonusViewModel @AssistedInject constructor(
     @Assisted("coffeeShop") val coffeeShop: CoffeeShop,
-    val sessionRepository: SessionRepository,
-    val coffeeShopRepository: CoffeeShopRepository,
-    val userRepository: UserRepository,
-    val coffeeBonusRepository: CoffeeBonusRepository,
-    val converter: ModelConverter
+    private val sessionRepository: SessionRepository,
+    private val coffeeShopRepository: CoffeeShopRepository,
+    private val userRepository: UserRepository,
+    private val coffeeBonusRepository: CoffeeBonusRepository,
+    private val converter: ModelConverter
 ) : BaseViewModel() {
     @Suppress("UNCHECKED_CAST")
     companion object {
@@ -56,7 +55,7 @@ class BonusViewModel @AssistedInject constructor(
         object NavigationToLogin : Event()
     }
 
-    private val eventChannel = Channel<BonusViewModel.Event>(Channel.BUFFERED)
+    private val eventChannel = Channel<Event>(Channel.BUFFERED)
     val eventsFlow = eventChannel.receiveAsFlow()
 
     private val _loadingStateFlow = MutableStateFlow<Boolean>(false)
@@ -146,7 +145,7 @@ class BonusViewModel @AssistedInject constructor(
 
     fun onLoginClick() {
         viewModelScope.launch {
-            eventChannel.send(BonusViewModel.Event.NavigationToLogin)
+            eventChannel.send(Event.NavigationToLogin)
         }
     }
 
@@ -198,7 +197,7 @@ class BonusViewModel @AssistedInject constructor(
     fun createBonusProgram(count: Int) {
         if (!sessionRepository.userLogined.value) {
             viewModelScope.launch {
-                eventChannel.send(BonusViewModel.Event.ShowNeedAuthorisationMessage)
+                eventChannel.send(Event.ShowNeedAuthorisationMessage)
             }
             return
         }

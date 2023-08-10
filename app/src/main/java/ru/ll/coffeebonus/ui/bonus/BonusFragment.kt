@@ -27,7 +27,6 @@ import ru.ll.coffeebonus.databinding.FragmentBonusBinding
 import ru.ll.coffeebonus.domain.CoffeeShop
 import ru.ll.coffeebonus.ui.BaseFragment
 import ru.ll.coffeebonus.ui.coffee.CoffeeFragment.Companion.ARG_COFFEESHOP
-import ru.ll.coffeebonus.ui.coffee.CoffeeViewModel
 import ru.ll.coffeebonus.ui.login.LoginFragment
 import ru.ll.coffeebonus.ui.util.hideKeyboard
 import timber.log.Timber
