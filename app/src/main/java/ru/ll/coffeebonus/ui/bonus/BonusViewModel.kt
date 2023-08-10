@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -19,6 +20,7 @@ import ru.ll.coffeebonus.domain.coffeeshop.ModelConverter
 import ru.ll.coffeebonus.domain.user.UserBonusPrograms
 import ru.ll.coffeebonus.domain.user.UserRepository
 import ru.ll.coffeebonus.ui.BaseViewModel
+import ru.ll.coffeebonus.ui.coffee.CoffeeViewModel
 import timber.log.Timber
 
 class BonusViewModel @AssistedInject constructor(
@@ -47,6 +49,15 @@ class BonusViewModel @AssistedInject constructor(
             @Assisted("coffeeShop") coffeeShop: CoffeeShop
         ): BonusViewModel
     }
+
+    sealed class Event {
+        object ShowNeedAuthorisationMessage : Event()
+        data class ShowMessage(val message: String) : Event()
+        object NavigationToLogin : Event()
+    }
+
+    private val eventChannel = Channel<BonusViewModel.Event>(Channel.BUFFERED)
+    val eventsFlow = eventChannel.receiveAsFlow()
 
     private val _loadingStateFlow = MutableStateFlow<Boolean>(false)
     val loadingStateFlow = _loadingStateFlow.asStateFlow()
@@ -133,6 +144,12 @@ class BonusViewModel @AssistedInject constructor(
         }
     }
 
+    fun onLoginClick() {
+        viewModelScope.launch {
+            eventChannel.send(BonusViewModel.Event.NavigationToLogin)
+        }
+    }
+
     fun addCoffeeButtonClick() {
         viewModelScope.launch {
             try {
@@ -179,6 +196,12 @@ class BonusViewModel @AssistedInject constructor(
     }
 
     fun createBonusProgram(count: Int) {
+        if (!sessionRepository.userLogined.value) {
+            viewModelScope.launch {
+                eventChannel.send(BonusViewModel.Event.ShowNeedAuthorisationMessage)
+            }
+            return
+        }
         viewModelScope.launch {
             try {
 //                  TODO: показать лоудер
@@ -210,6 +233,7 @@ class BonusViewModel @AssistedInject constructor(
             } finally {
 //                TODO убрать лоудер
             }
+
         }
     }
 //    Заинжектить coffeeShop

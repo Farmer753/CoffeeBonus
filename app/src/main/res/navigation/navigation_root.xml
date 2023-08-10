@@ -94,4 +94,11 @@
         </action>
     </fragment>
 
+    <action
+        android:id="@+id/action_bonus_to_login"
+        app:destination="@+id/loginFragment">
+        <argument
+            android:name="ARG_OPEN_PROFILE"
+            app:argType="boolean" />
+    </action>
 </navigation>

@@ -9,12 +9,15 @@ import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
 import android.widget.ImageView
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
 import androidx.core.view.get
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -24,6 +27,8 @@ import ru.ll.coffeebonus.databinding.FragmentBonusBinding
 import ru.ll.coffeebonus.domain.CoffeeShop
 import ru.ll.coffeebonus.ui.BaseFragment
 import ru.ll.coffeebonus.ui.coffee.CoffeeFragment.Companion.ARG_COFFEESHOP
+import ru.ll.coffeebonus.ui.coffee.CoffeeViewModel
+import ru.ll.coffeebonus.ui.login.LoginFragment
 import ru.ll.coffeebonus.ui.util.hideKeyboard
 import timber.log.Timber
 import javax.inject.Inject
@@ -55,6 +60,33 @@ class BonusFragment : BaseFragment<FragmentBonusBinding, BonusViewModel>() {
         }
         initNotBonusLayout()
         initBonusLayout()
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.eventsFlow
+                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .collect { event ->
+                    Timber.d("$event event")
+                    when (event) {
+                        is BonusViewModel.Event.ShowNeedAuthorisationMessage -> {
+                            val snackbar = Snackbar.make(
+                                binding.root,
+                                R.string.need_authorisation,
+                                Snackbar.LENGTH_LONG
+                            )
+                            snackbar.setAction(R.string.login) { viewModel.onLoginClick() }
+                            snackbar.show()
+                        }
+                        is BonusViewModel.Event.NavigationToLogin -> {
+                            findNavController().navigate(
+                                R.id.action_bonus_to_login,
+                                bundleOf(LoginFragment.ARG_OPEN_PROFILE to false)
+                            )
+                        }
+                        is BonusViewModel.Event.ShowMessage -> showMessage(event.message)
+
+                    }
+                }
+        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.loadingStateFlow
