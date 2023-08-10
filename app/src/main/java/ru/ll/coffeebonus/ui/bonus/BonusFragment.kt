@@ -24,6 +24,7 @@ import ru.ll.coffeebonus.databinding.FragmentBonusBinding
 import ru.ll.coffeebonus.domain.CoffeeShop
 import ru.ll.coffeebonus.ui.BaseFragment
 import ru.ll.coffeebonus.ui.coffee.CoffeeFragment.Companion.ARG_COFFEESHOP
+import ru.ll.coffeebonus.ui.util.hideKeyboard
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -46,11 +47,11 @@ class BonusFragment : BaseFragment<FragmentBonusBinding, BonusViewModel>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.buttonRetry.setOnClickListener { viewModel.loadInitialData() }
-        //                TODO скрывать клову по клику на кнопку
         binding.createBonusProgramButton.setOnClickListener {
             viewModel.createBonusProgram(
                 binding.bonusEditText.text.toString().toInt()
             )
+            binding.bonusEditText.hideKeyboard()
         }
         initNotBonusLayout()
         initBonusLayout()
