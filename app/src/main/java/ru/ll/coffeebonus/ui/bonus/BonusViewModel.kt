@@ -151,13 +151,23 @@ class BonusViewModel @AssistedInject constructor(
 
     fun addCoffeeButtonClick() {
         viewModelScope.launch {
+            val userCount =  _userCoffeeCountStateFlow.value
             try {
                 userRepository.upsertUserBonusProgram(
                     _coffeeShopStateFlow.value!!.firestoreId,
-                    _userCoffeeCountStateFlow.value + 1
+                    userCount + 1
                 )
             } catch (t: Throwable) {
-                Timber.e(t, "ошибка")
+                Timber.e(t, "ошибка добавления чашки кофе")
+                eventChannel.send(Event.ShowMessage("не удалось добавить"))
+                try {
+                    userRepository.upsertUserBonusProgram(
+                        _coffeeShopStateFlow.value!!.firestoreId,
+                        userCount
+                    )
+                } catch (t: Throwable) {
+//                   ничего не делать
+                }
             }
         }
     }

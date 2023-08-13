@@ -3,6 +3,7 @@ package ru.ll.coffeebonus.data
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Source
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
@@ -74,8 +75,10 @@ class UserRepositoryImpl(
         firestoreId: String,
         newCount: Int
     ) {
+        Timber.d("upsertUserBonusProgram начало")
         val user = bd.collection(COLLECTION_USERS).document(getAuthorizedUser().id).get().await()
             .toObject(FirestoreUser::class.java)!!
+        Timber.d("upsertUserBonusProgram после user")
 //        получить все бонусные программы
         val bonusPrograms = user.bonusPrograms
 //        найти в бонусных программах нужную бонусную программу по айди кофейни, если она есть.
@@ -91,9 +94,23 @@ class UserRepositoryImpl(
             add(bonusToUpdate)
         }
 //        записать полученный обновленный массив в firestore
-        bd.collection(COLLECTION_USERS).document(getAuthorizedUser().id)
-            .set(user.copy(bonusPrograms = bonusProgramsToUpdate)).await()
+//        bd.collection(COLLECTION_USERS).document(getAuthorizedUser().id)
+//            .set(user.copy(bonusPrograms = bonusProgramsToUpdate)).await()
+        val isSuccessful = bd.collection(COLLECTION_USERS).document(getAuthorizedUser().id)
+            .set(user.copy(bonusPrograms = bonusProgramsToUpdate)).isSuccessful
+
+        Timber.d("upsertUserBonusProgram обновление $isSuccessful")
+        if (!isSuccessful){
+            throw IllegalStateException("upsertUserBonusProgram throw")
+        }
     }
+
+    override suspend fun getUserFromServer(): FirestoreUser {
+        return bd.collection(COLLECTION_USERS).document(getAuthorizedUser().id).get(Source.SERVER)
+            .await()
+            .toObject(FirestoreUser::class.java)!!
+    }
+
 
     override fun getFirestoreUserFlow(): Flow<FirestoreUser?> {
         return bd.collection(COLLECTION_USERS).document(getAuthorizedUser().id)

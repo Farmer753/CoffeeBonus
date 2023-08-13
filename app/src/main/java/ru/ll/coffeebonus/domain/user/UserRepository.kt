@@ -11,5 +11,6 @@ interface UserRepository {
     suspend fun addCoffeeFavorite(firestoreId: String)
     suspend fun removeCoffeeFavorite(firestoreId: String)
     suspend fun upsertUserBonusProgram(firestoreId: String, newCount: Int)
+    suspend fun getUserFromServer(): FirestoreUser
     fun getFirestoreUserFlow(): Flow<FirestoreUser?>
 }
