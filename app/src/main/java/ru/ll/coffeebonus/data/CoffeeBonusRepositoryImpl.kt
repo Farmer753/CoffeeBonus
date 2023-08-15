@@ -4,6 +4,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import ru.ll.coffeebonus.domain.bonus.CoffeeBonusRepository
 import ru.ll.coffeebonus.domain.bonus.FirestoreBonus
+import timber.log.Timber
 
 class CoffeeBonusRepositoryImpl(
     private val bd: FirebaseFirestore
@@ -18,7 +19,12 @@ class CoffeeBonusRepositoryImpl(
 
     override suspend fun saveBonusProgram(firestoreId: String, firestoreBonus: FirestoreBonus) {
         val documentReference = bd.collection(COLLECTION_COFFEE_SHOPS).document(firestoreId)
-        documentReference.update(FIELD_COFFEE_BONUS, firestoreBonus).await()
+        val isSuccessful = documentReference.update(FIELD_COFFEE_BONUS, firestoreBonus).isSuccessful
+        Timber.d("saveBonusProgram сохранена $isSuccessful")
+        if (!isSuccessful) {
+            documentReference.update(FIELD_COFFEE_BONUS, null).await()
+            throw IllegalStateException("saveBonusProgram throw")
+        }
     }
 
     override suspend fun edit(firestoreId: String, newFreeCoffee: FirestoreBonus) {

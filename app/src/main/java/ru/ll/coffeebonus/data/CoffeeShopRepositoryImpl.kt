@@ -8,6 +8,7 @@ import kotlinx.coroutines.tasks.await
 import ru.ll.coffeebonus.domain.coffeeshop.CoffeeShopRepository
 import ru.ll.coffeebonus.domain.coffeeshop.FirestoreCoffeeShop
 import ru.ll.coffeebonus.ui.util.snapshotFlow
+import timber.log.Timber
 
 class CoffeeShopRepositoryImpl(
     private val bd: FirebaseFirestore
@@ -21,8 +22,16 @@ class CoffeeShopRepositoryImpl(
 
     override suspend fun createCoffeeShop(firestoreCoffeeShop: FirestoreCoffeeShop) {
         val documentReference = bd.collection(COLLECTION_COFFEE_SHOPS).document()
-        documentReference.set(firestoreCoffeeShop.apply { firestoreId = documentReference.id })
-            .await()
+        val task = documentReference.set(firestoreCoffeeShop.apply {
+            firestoreId = documentReference.id
+        })
+        val isSuccessful = task.isSuccessful
+//        TODO: написать свой await, который будет кидать ошибку
+        Timber.d("createCoffeeShop создан $isSuccessful, ${task.exception?.message}, ${task.isComplete}")
+        if (!isSuccessful) {
+            documentReference.delete().await()
+            throw IllegalStateException("createCoffeeShop throw")
+        }
     }
 
     override suspend fun exists(id: String): Boolean {

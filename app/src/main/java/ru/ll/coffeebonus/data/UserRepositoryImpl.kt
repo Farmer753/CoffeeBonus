@@ -100,7 +100,7 @@ class UserRepositoryImpl(
             .set(user.copy(bonusPrograms = bonusProgramsToUpdate)).isSuccessful
 
         Timber.d("upsertUserBonusProgram обновление $isSuccessful")
-        if (!isSuccessful){
+        if (!isSuccessful) {
             throw IllegalStateException("upsertUserBonusProgram throw")
         }
     }

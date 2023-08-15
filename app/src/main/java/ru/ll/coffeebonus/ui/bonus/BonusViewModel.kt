@@ -151,7 +151,7 @@ class BonusViewModel @AssistedInject constructor(
 
     fun addCoffeeButtonClick() {
         viewModelScope.launch {
-            val userCount =  _userCoffeeCountStateFlow.value
+            val userCount = _userCoffeeCountStateFlow.value
             try {
                 userRepository.upsertUserBonusProgram(
                     _coffeeShopStateFlow.value!!.firestoreId,
@@ -213,7 +213,6 @@ class BonusViewModel @AssistedInject constructor(
         }
         viewModelScope.launch {
             try {
-//                  TODO: показать лоудер
                 //  получить кофейню по яндекс id
                 val firestoreCoffeeShopFromServer =
                     coffeeShopRepository.getByYandexId(coffeeShop.id)
@@ -229,20 +228,10 @@ class BonusViewModel @AssistedInject constructor(
                         FirestoreBonus(count)
                     )
                 }
-                val coffeeShopFromServer =
-                    coffeeShopRepository.getByYandexIdFromServer(coffeeShop.id)
-//                TODO не выводит в логи
-                Timber.d("coffeeShopFromServer $coffeeShopFromServer")
-                if (coffeeShopFromServer?.coffeeBonus == null) {
-                    throw IllegalStateException("Не удалось убедиться в создании бонусной программы")
-                }
             } catch (t: Throwable) {
 //                TODO: показать ошибку
-                Timber.e(t, "ошибка")
-            } finally {
-//                TODO убрать лоудер
+                Timber.e(t, "Ошибка создания бонусной программы")
             }
-
         }
     }
 //    Заинжектить coffeeShop
